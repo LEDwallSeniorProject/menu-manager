@@ -22,23 +22,24 @@ def exit_prog():
     canvas.delete()
     sys.exit()
 
+frame = 0
 while not game_over:
 
     if snake_pos == food_pos:
         food_spawned = False
 
-    start = time.time()
-    while time.time() - start < 0.25:
-        if game_pad.active_keys() == [46]:
-            snake_dir = [0, -1]
-        elif game_pad.active_keys() == [33]:
-            snake_dir = [1, 0]
-        elif game_pad.active_keys() == [32]:
-            snake_dir = [0, 1]
-        elif game_pad.active_keys() == [18]:
-            snake_dir = [-1, 0]
-        elif game_pad.active_keys() == [24]:
-            exit_prog()
+    # start = time.time()
+    # while time.time() - start < 0.25:
+    if game_pad.active_keys() == [46]:
+        snake_dir = [0, -1]
+    elif game_pad.active_keys() == [33]:
+        snake_dir = [1, 0]
+    elif game_pad.active_keys() == [32]:
+        snake_dir = [0, 1]
+    elif game_pad.active_keys() == [18]:
+        snake_dir = [-1, 0]
+    elif game_pad.active_keys() == [24]:
+        exit_prog()
 
     canvas.clear()
 
@@ -66,14 +67,15 @@ while not game_over:
 
     canvas.draw()
 
-    snake_pos[0] += snake_dir[0]
-    snake_pos[1] += snake_dir[1]
+    if frame % 2 == 0:
+        snake_pos[0] += snake_dir[0]
+        snake_pos[1] += snake_dir[1]
 
-    if snake_pos[0] < 0 or snake_pos[0] >= 33 or snake_pos[1] < 0 or snake_pos[1] >= 33:
-        game_over = True
+        if snake_pos[0] < 0 or snake_pos[0] >= 33 or snake_pos[1] < 0 or snake_pos[1] >= 33:
+            game_over = True
 
-    if snake_pos in snake_body:
-        game_over = True
+        if snake_pos in snake_body:
+            game_over = True
 
     if game_over:
         canvas.clear()
@@ -82,4 +84,5 @@ while not game_over:
         time.sleep(2)
         break
 
+    frame += 1
     # Add your code here
