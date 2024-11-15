@@ -1,0 +1,22 @@
+[Unit]
+Description=manager program
+After=network.target
+After=zmqserver.service
+StartLimitInterval=200
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=led
+Group=led
+WorkingDirectory=/home/led/git/menu-manager
+Environment="VIRTUAL_ENV=/home/led/ledwallvenv"
+Environment="PATH=$VIRTUAL_ENV/bin:$PATH"
+ExecStart=/home/led/ledwallvenv/bin/python3 /home/led/git/menu-manager/manager.py
+Restart=always
+RestartSec=30
+#ProtectSystem=full
+#PrivateDevices=true
+
+[Install]
+WantedBy=multi-user.target
