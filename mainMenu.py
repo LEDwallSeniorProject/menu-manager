@@ -5,7 +5,11 @@ from evdev import InputDevice, categorize, ecodes
 import os
 
 # Initialize canvas
-gamepad = InputDevice("/dev/input/event1")
+bt1device = "/dev/input/event1"
+print(f"Checking for Bluetooth adapter at {bt1device}")
+while os.path.exists(bt1device) == False:
+    time.sleep(1)
+gamepad = InputDevice(bt1device)
 
 # Initialize the canvas
 canvas = c.Canvas()
@@ -164,6 +168,7 @@ while True:
     #     canvas.clear()
     
     canvas.clear()
+    time.sleep(0.15)
     if main_scene:
 
         if gamepad.active_keys() == [46]:
@@ -220,7 +225,7 @@ while True:
         canvas.add(selector)
     
     else:
-        time.sleep(0.1)
+        
         if gamepad.active_keys() == [46]:
             on_key_w()
         if gamepad.active_keys() == [18]:

@@ -2,6 +2,8 @@ import time
 import subprocess
 import os
 import sys
+from PIL import Image
+import zmq
 from threading import Thread
 #from matrix_library import shapes as s, canvas as c
 # from evdev import InputDevice, categorize, ecodes
@@ -33,6 +35,16 @@ def run_shutdown():
 # initial setup
 dir_path = os.path.dirname(os.path.abspath(__file__))
 os.chdir(dir_path)
+
+# Startup screen
+context = zmq.Context()
+socket = context.socket(zmq.REQ)
+socket.connect("tcp://localhost:55000")
+with Image.open("startup.png") as img:
+    img = img.convert("RGBA")
+    rawimage = img.tobytes()
+    socket.send(rawimage)
+    message = socket.recv()
 
 while True:
     # run main program
