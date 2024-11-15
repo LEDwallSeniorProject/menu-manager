@@ -27,7 +27,7 @@ def run_program(program):
     return result.stdout.rstrip()
 
 def run_shutdown():
-	result = subprocess.run(["sudo","/usr/sbin/halt"], capture_output=True, text=True)
+	result = subprocess.run(["/usr/bin/sudo","/usr/sbin/halt"], capture_output=True, text=True)
 	return result.stdout.rstrip()
 
 # initial setup
