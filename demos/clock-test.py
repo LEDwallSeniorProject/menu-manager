@@ -3,7 +3,7 @@ from datetime import datetime
 import time
 from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event2")
+gamepad = InputDevice("/dev/input/event1")
 
 # NOTE: This is modified to only run for 10 seconds
 timer = 0

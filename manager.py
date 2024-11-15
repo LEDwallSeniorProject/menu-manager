@@ -21,8 +21,9 @@ class ThreadWithReturnValue(Thread):
         return self._return
 
 def run_program(program):
-	result = subprocess.run(["sudo","/usr/bin/python3.11",program], capture_output=True, text=True)
-	return result.stdout.rstrip()
+    print("Running program:", program)
+    result = subprocess.run(["python3",program], capture_output=True, text=True)
+    return result.stdout.rstrip()
 
 def run_shutdown():
 	result = subprocess.run(["sudo","/usr/sbin/halt"], capture_output=True, text=True)
@@ -34,7 +35,7 @@ os.chdir(dir_path)
 
 while True:
     # run main program
-    print("Loop start")
+    print("Loop start - launching mainMenu")
     mainthread = ThreadWithReturnValue(target=run_program, args=("mainMenu.py",))
     mainthread.start()
     subDemo = mainthread.join()

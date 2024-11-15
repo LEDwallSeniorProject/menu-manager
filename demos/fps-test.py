@@ -2,7 +2,7 @@ from matrix_library import shapes as s, canvas as c
 import time
 from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event2")
+gamepad = InputDevice("/dev/input/event1")
 
 canvas = c.Canvas()
 thickness = 2

@@ -4,7 +4,7 @@ import sys
 
 from evdev import InputDevice, categorize, ecodes
 
-game_pad = InputDevice("/dev/input/event2")
+game_pad = InputDevice("/dev/input/event1")
 
 canvas = c.Canvas()
 

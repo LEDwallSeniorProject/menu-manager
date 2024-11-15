@@ -5,7 +5,7 @@ from evdev import InputDevice, categorize, ecodes
 import random  # For randomizing ball direction and speed variation after reset
 
 # Initialize canvas
-gamepad = InputDevice("/dev/input/event2")
+gamepad = InputDevice("/dev/input/event1")
 
 canvas = c.Canvas()
 # gamepad = InputDevice("/dev/input/event2")

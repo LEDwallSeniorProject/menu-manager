@@ -3,7 +3,7 @@ import time
 import random
 from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event2")
+gamepad = InputDevice("/dev/input/event1")
 
 canvas = c.Canvas()
 circle = s.Circle(10, (64, 96), (0, 255, 0))
