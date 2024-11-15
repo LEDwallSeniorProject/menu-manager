@@ -6,7 +6,7 @@ import os
 
 # Initialize canvas
 bt1device = "/dev/input/event1"
-print(f"Checking for Bluetooth adapter at {bt1device}")
+#print(f"Checking for Bluetooth adapter at {bt1device}")
 while os.path.exists(bt1device) == False:
     time.sleep(1)
 gamepad = InputDevice(bt1device)
