@@ -1,8 +1,9 @@
 import time
 import subprocess
 import os
+import sys
 from threading import Thread
-from matrix_library import shapes as s, canvas as c
+#from matrix_library import shapes as s, canvas as c
 # from evdev import InputDevice, categorize, ecodes
 
 class ThreadWithReturnValue(Thread):
@@ -22,7 +23,7 @@ class ThreadWithReturnValue(Thread):
 
 def run_program(program):
     print("Running program:", program)
-    result = subprocess.run(["python3",program], capture_output=True, text=True)
+    result = subprocess.run([sys.executable,program], capture_output=True, text=True)
     return result.stdout.rstrip()
 
 def run_shutdown():
@@ -41,7 +42,7 @@ while True:
     subDemo = mainthread.join()
 
     if subDemo == "demos":
-        programs = ["demos/clock-test.py","demos/spin2-test.py","demos/fps-test.py","demos/bounce2-test.py"]
+        programs = ["demos/clock-test.py","demos/fps-test.py","demos/bounce2-test.py","demos/scrolling.py","demos/random-image.py"]
 
         for prog in programs:
             thread = ThreadWithReturnValue(target=run_program, args=(prog,))

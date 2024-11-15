@@ -12,9 +12,10 @@ def exit_prog():
     canvas.delete()
     sys.exit()
 
-while True:
-        if gamepad.active_keys() == [24]:
-    exit_prog()
+counter = 0
+while counter <= 150:
+    if gamepad.active_keys() == [24]:
+        exit_prog()
 
     canvas.clear()
     text.translate(-2, 0)
@@ -22,3 +23,5 @@ while True:
         text.set_position([128, (text.position[1] + 64) % 128])
     canvas.add(text)
     canvas.draw()
+
+    counter += 1
