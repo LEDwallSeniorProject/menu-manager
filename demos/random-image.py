@@ -25,7 +25,6 @@ context = zmq.Context()
 socket = context.socket(zmq.REQ)
 socket.connect("tcp://localhost:55000")
 
-
 # random picture URL
 w = h = 128
 url = f"https://picsum.photos/{w}"
@@ -49,7 +48,7 @@ for i in range(0,3):
         # #  Get the reply.
         message = socket.recv()
 
-    for j in range(0,500):
+    for j in range(0,100):
         if gamepad.active_keys() == [24]:
             exit_prog()
-        time.sleep(0.01)
+        time.sleep(0.05)

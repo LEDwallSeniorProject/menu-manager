@@ -19,7 +19,7 @@ food_spawned = False
 food_pos = [16, 8]
 
 def exit_prog():
-    canvas.delete()
+    del canvas
     sys.exit()
 
 frame = 0
