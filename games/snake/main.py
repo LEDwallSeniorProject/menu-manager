@@ -6,7 +6,6 @@ from evdev import InputDevice, categorize, ecodes
 
 game_pad = InputDevice("/dev/input/event2")
 
-
 canvas = c.Canvas()
 
 snake_pos = [16, 16]

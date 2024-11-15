@@ -4,6 +4,7 @@ import time
 from evdev import InputDevice, categorize, ecodes
 import os
 
+# Initialize canvas
 gamepad = InputDevice("/dev/input/event2")
 
 # Initialize the canvas
@@ -27,8 +28,8 @@ options = [demoheader, gamesheader]
 selected_index = 0
 actions = [lambda: demo_action(), lambda: games_action()]
 
-# selector box for selection
-selector_box = s.Polygonselector(s.get_polygon_vertices(4, 20, (-100, -100)), (0, 255, 0), 1)
+# Initialize selectors
+selector = s.Polygon(s.get_polygon_vertices(4, 12, (20, 120)), (0, 255, 0))
 
 # Games scene to manage game folders
 class GamesScene:
@@ -39,8 +40,8 @@ class GamesScene:
         self.items_per_page = 7
 
     def load_game_folders(self):
-        current_dir = os.path.dirname(__file__)  # Get the directory of the current file
-        games_dir = os.path.join(current_dir, "games")  # Path to the 'games' folder
+        current_dir = os.path.dirname(__file__)
+        games_dir = os.path.join(current_dir, "games")
         return [folder for folder in os.listdir(games_dir) if os.path.isdir(os.path.join(games_dir, folder))]
 
     def get_current_page(self):
@@ -76,8 +77,8 @@ def demo_action():
     print("demos")
     canvas.clear()
     canvas.draw()
-    del canvas
-    sys.exit(0)
+    # del canvas
+    # sys.exit(0)
 
 def games_action():
     global main_scene
@@ -91,8 +92,8 @@ def shutdown():
     print("shutdown")
     canvas.clear()
     canvas.draw()
-    del canvas
-    sys.exit(0)
+    # del canvas
+    # sys.exit(0)
 
 # Keyboard event handlers
 def on_key_w():
@@ -113,14 +114,18 @@ def on_key_s():
     countdown_value = 16
     countdown_expired = False
 
-def on_key_x():
+def on_key_j():
     global countdown_value, countdown_expired
     if main_scene:
         actions[selected_index]()
     else:
         selected_game = games_scene.get_selected_game()
         if selected_game:
-            print(f"games/{selected_game}")
+            print(f"game/{selected_game}")
+            canvas.clear()
+            canvas.draw()
+            # del canvas
+            # sys.exit(0)
     countdown_value = 16
     countdown_expired = False
 
@@ -132,7 +137,7 @@ def on_key_d():
     if not main_scene:
         games_scene.next_page()
 
-def on_key_c():
+def on_key_l():
     if not main_scene:
         main_action()
 
@@ -163,18 +168,23 @@ while True:
             if gamepad.active_keys() == [32]:
                 on_key_s()
             if gamepad.active_keys() == [23]:
-                on_key_x()
+                on_key_j()
             if gamepad.active_keys() == [49]:
                 shutdown()
 
             selected_option = options[selected_index]
-            box_x = selected_option.position[0] - 2  # Add a small margin
-            box_y = selected_option.position[1] - 2
-            box_width = selected_option.get_width() + 4
-            box_height = selected_option.size * 8 + 4
-
-            # Set vertices for the selector box
-            selector_box.vertices = s.get_polygon_vertices(4, 20, (box_x + 142, box_y + 15))
+            
+            # Calculate desired selector position for the main menu based on selected_index
+            selector_x = 132  # Adjust X position as needed for the main menu
+            selector_y = 46 + selected_index * 27  # Update Y based on selected_index
+            
+            # Get current selector position and calculate translation
+            current_center = selector.get_center()
+            dx = selector_x - current_center[0]
+            dy = selector_y - current_center[1]
+            
+            # Move selector to new position
+            selector.translate(dx, dy)
 
             # Update scrolling creator names
             creatornames.translate(-2, 0)
@@ -183,18 +193,18 @@ while True:
 
             # Countdown Timer Logic
             if countdown_value > 0:
-                countdown_value -= 2 / fps  # Decrease countdown_value based on frame rate
+                countdown_value -= 2 / fps
             else:
                 if not countdown_expired:
-                    demo_action()  # Call demo action only once
-                    countdown_expired = True  # Set flag to prevent repeated calls
+                    demo_action()
+                    countdown_expired = True
 
             # Update countdown display text and position
-            countdown_display.set_text(str(int(countdown_value)))  # Update the display text
+            countdown_display.set_text(str(int(countdown_value)))
             if countdown_value < 10:
-                countdown_display.set_position((114, 119))  # Move to the right if single-digit
+                countdown_display.set_position((114, 119))
             else:
-                countdown_display.set_position((110, 119))  # Keep original position for double-digit
+                countdown_display.set_position((110, 119))
 
             # Draw everything
             canvas.add(square)
@@ -203,17 +213,43 @@ while True:
             canvas.add(demoheader)
             canvas.add(gamesheader)
             canvas.add(creatornames)
-            canvas.add(countdown_display)  # Draw the countdown display
-            canvas.add(selector_box)  # Add the green selector box
+            canvas.add(countdown_display)
+            canvas.add(selector)
         
         else:
+            if gamepad.active_keys() == [46]:
+                on_key_w()
+            if gamepad.active_keys() == [18]:
+                on_key_a()
+            if gamepad.active_keys() == [32]:
+                on_key_s()
+            if gamepad.active_keys() == [33]:
+                on_key_d()
+            if gamepad.active_keys() == [23]:
+                on_key_j()
+            if gamepad.active_keys() == [34]:
+                on_key_l()
+            if gamepad.active_keys() == [49]:
+                shutdown()
+
             game_names = games_scene.get_current_page()
             for i, game in enumerate(game_names):
-                game_phrase = s.Phrase(game, (8, 7 + i * 15), (255, 255, 255), size=1)
+                game_phrase = s.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
                 canvas.add(game_phrase)
+            
             selected_game = games_scene.get_selected_game()
             if selected_game:
-                selector_box.vertices = s.get_polygon_vertices(4, 6, (0, 10 + games_scene.selected_index * 15))
-                canvas.add(selector_box)
+                # Calculate desired selector position for games menu
+                selector_x = -6
+                selector_y = 10 + games_scene.selected_index * 15
+                
+                # Get current selector position and calculate translation
+                current_center = selector.get_center()
+                dx = selector_x - current_center[0]
+                dy = selector_y - current_center[1]
+                
+                # Move selector to new position
+                selector.translate(dx, dy)
+                canvas.add(selector)
         
         canvas.draw()

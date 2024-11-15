@@ -3,7 +3,7 @@ import subprocess
 import os
 from threading import Thread
 from matrix_library import shapes as s, canvas as c
-from evdev import InputDevice, categorize, ecodes
+# from evdev import InputDevice, categorize, ecodes
 
 class ThreadWithReturnValue(Thread):
     
@@ -52,18 +52,22 @@ while True:
         thread = ThreadWithReturnValue(target=run_shutdown)
         thread.start()
 
-    # elif subDemo == "snake":
-    # 	thread = ThreadWithReturnValue(target=run_other_program, args=(subDemo,))
-    # 	thread.start()
-    # elif subDemo == "pong":
-    # 	thread = ThreadWithReturnValue(target=run_other_program, args=(subDemo,))
-    # 	thread.start()
+    elif subDemo.startswith("game/"):
+        # Extract game folder name from the printed string
+        game_folder = subDemo.split("/", 1)[1]
+        game_path = os.path.join(dir_path, "games", game_folder, "main.py")
+
+        if os.path.isfile(game_path):
+            # Use run_program to execute main.py in the selected game folder
+            thread = ThreadWithReturnValue(target=run_program, args=(game_path,))
+            thread.start()
+            thread.join()
+        else:
+            print(f"Error: main.py not found in the folder '{game_folder}'.")
 
     # create a thread
     else:
         print(f"Executing {subDemo}")
         thread = ThreadWithReturnValue(target=run_program, args=(subDemo,))
         thread.start()
-
-        # Wait until the thread joins -- note that if the thread never dies I'll never come back!
         thread.join()

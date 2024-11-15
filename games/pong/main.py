@@ -1,5 +1,6 @@
 from matrix_library import shapes as s, canvas as c
 import time
+import sys
 from evdev import InputDevice, categorize, ecodes
 import random  # For randomizing ball direction and speed variation after reset
 
@@ -130,14 +131,13 @@ move_counter = 0  # Counter to control AI movement frequency
 while True:
     canvas.clear()
     
-    # Check for paddle movement
     if gamepad.active_keys() == [46]:
         paddle1.move(-1)
     if gamepad.active_keys() == [32]:
         paddle1.move(1)
     if gamepad.active_keys() == [24]:
         exit_prog()
-    
+
     # AI movement for paddle2
     move_counter += 1
     if move_counter >= AI_REACTION_SPEED:
