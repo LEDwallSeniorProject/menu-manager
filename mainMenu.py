@@ -77,8 +77,8 @@ def demo_action():
     print("demos")
     canvas.clear()
     canvas.draw()
-    # del canvas
-    # sys.exit(0)
+    del canvas
+    sys.exit(0)
 
 def games_action():
     global main_scene
@@ -92,8 +92,8 @@ def shutdown():
     print("shutdown")
     canvas.clear()
     canvas.draw()
-    # del canvas
-    # sys.exit(0)
+    del canvas
+    sys.exit(0)
 
 # Keyboard event handlers
 def on_key_w():
@@ -124,8 +124,8 @@ def on_key_j():
             print(f"game/{selected_game}")
             canvas.clear()
             canvas.draw()
-            # del canvas
-            # sys.exit(0)
+            del canvas
+            sys.exit(0)
     countdown_value = 16
     countdown_expired = False
 
