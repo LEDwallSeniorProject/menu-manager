@@ -17,7 +17,7 @@ PADDLE_WIDTH = 8
 PADDLE_HEIGHT = 40
 PADDLE_SPEED = 6
 BALL_SPEED = 6
-SLEEP_TIME = 1 / 30  # Frame rate
+#SLEEP_TIME = 1 / 30  # Frame rate
 AI_REACTION_SPEED = 2  # Lower number = faster reaction
 VELOCITY_VARIATION_AMOUNT = 2
 MIN_SPEED = 2
@@ -48,7 +48,7 @@ def reset_ball():
     ball.velocity_y = BALL_SPEED * angle
 
 def exit_prog():
-    canvas.delete()
+    del canvas
     sys.exit()
 
 # Ball class
@@ -64,12 +64,12 @@ class Ball(s.Circle):
         # Check for scoring (ball leaving canvas horizontally)
         if self.center[0] + BALL_RADIUS < 0:  # Ball passed left boundary
             player2_score += 1
-            print(f"Score - Player 1: {player1_score} | Player 2: {player2_score}")
+            #print(f"Score - Player 1: {player1_score} | Player 2: {player2_score}")
             reset_ball()
             return
         elif self.center[0] - BALL_RADIUS > WIDTH:  # Ball passed right boundary
             player1_score += 1
-            print(f"Score - Player 1: {player1_score} | Player 2: {player2_score}")
+            #print(f"Score - Player 1: {player1_score} | Player 2: {player2_score}")
             reset_ball()
             return
 
@@ -120,6 +120,8 @@ class Paddle(s.Polygon):
 ball = Ball(BALL_RADIUS, (WIDTH // 2, HEIGHT // 2), (200, 0, 0), -BALL_SPEED, BALL_SPEED / 1.4)
 paddle1 = Paddle((PADDLE_WIDTH, HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT, (0, 220, 0))
 paddle2 = Paddle((WIDTH - PADDLE_WIDTH, HEIGHT // 2), PADDLE_WIDTH, PADDLE_HEIGHT, (15, 120, 15))
+score1 = s.Phrase(str(player1_score),[0,120])
+score2 = s.Phrase(str(player2_score),[112,120])
 
 # Add initial shapes to canvas
 canvas.add(ball)
@@ -161,13 +163,19 @@ while True:
         ball.velocity_x *= -1  # Reverse direction
         ball.apply_random_variation(-1)  # Apply variation moving to the left
 
+    # update scores
+    score1.set_text(str(player1_score))
+    score2.set_text(str(player2_score))
+
     # Re-add all objects to ensure proper rendering
     canvas.add(ball)
     canvas.add(paddle1)
     canvas.add(paddle2)
+    canvas.add(score1)
+    canvas.add(score2)
     
     # Draw the updated canvas
     canvas.draw()
 
     # Pause for frame rate control
-    time.sleep(SLEEP_TIME)
+    #time.sleep(SLEEP_TIME)
