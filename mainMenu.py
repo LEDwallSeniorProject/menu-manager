@@ -156,29 +156,96 @@ frame_time = 1 / fps
 last_frame_time = time.time()
 
 while True:
-    current_time = time.time()
-    elapsed_time = current_time - last_frame_time
+    # current_time = time.time()
+    # elapsed_time = current_time - last_frame_time
 
-    if elapsed_time >= frame_time:
-        last_frame_time = current_time
-        canvas.clear()
+    # if elapsed_time >= frame_time:
+    #     last_frame_time = current_time
+    #     canvas.clear()
+    
+    canvas.clear()
+    if main_scene:
+
+        if gamepad.active_keys() == [46]:
+            on_key_w()
+        if gamepad.active_keys() == [32]:
+            on_key_s()
+        if gamepad.active_keys() == [23]:
+            on_key_j()
+        if gamepad.active_keys() == [49]:
+            shutdown()
+
+        selected_option = options[selected_index]
         
-        if main_scene:
+        # Calculate desired selector position for the main menu based on selected_index
+        selector_x = 132  # Adjust X position as needed for the main menu
+        selector_y = 46 + selected_index * 27  # Update Y based on selected_index
+        
+        # Get current selector position and calculate translation
+        current_center = selector.get_center()
+        dx = selector_x - current_center[0]
+        dy = selector_y - current_center[1]
+        
+        # Move selector to new position
+        selector.translate(dx, dy)
 
-            if gamepad.active_keys() == [46]:
-                on_key_w()
-            if gamepad.active_keys() == [32]:
-                on_key_s()
-            if gamepad.active_keys() == [23]:
-                on_key_j()
-            if gamepad.active_keys() == [49]:
-                shutdown()
+        # Update scrolling creator names
+        creatornames.translate(-2, 0)
+        if creatornames.get_width() + creatornames.position[0] < 0:
+            creatornames.set_position([128, 100])
 
-            selected_option = options[selected_index]
-            
-            # Calculate desired selector position for the main menu based on selected_index
-            selector_x = 132  # Adjust X position as needed for the main menu
-            selector_y = 46 + selected_index * 27  # Update Y based on selected_index
+        # Countdown Timer Logic
+        if countdown_value > 0:
+            countdown_value -= 2 / fps
+        else:
+            if not countdown_expired:
+                demo_action()
+                countdown_expired = True
+
+        # Update countdown display text and position
+        countdown_display.set_text(str(int(countdown_value)))
+        if countdown_value < 10:
+            countdown_display.set_position((114, 119))
+        else:
+            countdown_display.set_position((110, 119))
+
+        # Draw everything
+        canvas.add(square)
+        canvas.add(headerline)
+        canvas.add(menuheader)
+        canvas.add(demoheader)
+        canvas.add(gamesheader)
+        canvas.add(creatornames)
+        canvas.add(countdown_display)
+        canvas.add(selector)
+    
+    else:
+        time.sleep(0.1)
+        if gamepad.active_keys() == [46]:
+            on_key_w()
+        if gamepad.active_keys() == [18]:
+            on_key_a()
+        if gamepad.active_keys() == [32]:
+            on_key_s()
+        if gamepad.active_keys() == [33]:
+            on_key_d()
+        if gamepad.active_keys() == [23]:
+            on_key_j()
+        if gamepad.active_keys() == [34]:
+            on_key_l()
+        if gamepad.active_keys() == [49]:
+            shutdown()
+
+        game_names = games_scene.get_current_page()
+        for i, game in enumerate(game_names):
+            game_phrase = s.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
+            canvas.add(game_phrase)
+        
+        selected_game = games_scene.get_selected_game()
+        if selected_game:
+            # Calculate desired selector position for games menu
+            selector_x = -6
+            selector_y = 10 + games_scene.selected_index * 15
             
             # Get current selector position and calculate translation
             current_center = selector.get_center()
@@ -187,71 +254,6 @@ while True:
             
             # Move selector to new position
             selector.translate(dx, dy)
-
-            # Update scrolling creator names
-            creatornames.translate(-2, 0)
-            if creatornames.get_width() + creatornames.position[0] < 0:
-                creatornames.set_position([128, 100])
-
-            # Countdown Timer Logic
-            if countdown_value > 0:
-                countdown_value -= 2 / fps
-            else:
-                if not countdown_expired:
-                    demo_action()
-                    countdown_expired = True
-
-            # Update countdown display text and position
-            countdown_display.set_text(str(int(countdown_value)))
-            if countdown_value < 10:
-                countdown_display.set_position((114, 119))
-            else:
-                countdown_display.set_position((110, 119))
-
-            # Draw everything
-            canvas.add(square)
-            canvas.add(headerline)
-            canvas.add(menuheader)
-            canvas.add(demoheader)
-            canvas.add(gamesheader)
-            canvas.add(creatornames)
-            canvas.add(countdown_display)
             canvas.add(selector)
         
-        else:
-            if gamepad.active_keys() == [46]:
-                on_key_w()
-            if gamepad.active_keys() == [18]:
-                on_key_a()
-            if gamepad.active_keys() == [32]:
-                on_key_s()
-            if gamepad.active_keys() == [33]:
-                on_key_d()
-            if gamepad.active_keys() == [23]:
-                on_key_j()
-            if gamepad.active_keys() == [34]:
-                on_key_l()
-            if gamepad.active_keys() == [49]:
-                shutdown()
-
-            game_names = games_scene.get_current_page()
-            for i, game in enumerate(game_names):
-                game_phrase = s.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
-                canvas.add(game_phrase)
-            
-            selected_game = games_scene.get_selected_game()
-            if selected_game:
-                # Calculate desired selector position for games menu
-                selector_x = -6
-                selector_y = 10 + games_scene.selected_index * 15
-                
-                # Get current selector position and calculate translation
-                current_center = selector.get_center()
-                dx = selector_x - current_center[0]
-                dy = selector_y - current_center[1]
-                
-                # Move selector to new position
-                selector.translate(dx, dy)
-                canvas.add(selector)
-        
-        canvas.draw()
+    canvas.draw()
