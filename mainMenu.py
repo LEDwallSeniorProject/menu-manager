@@ -5,7 +5,7 @@ from evdev import InputDevice, categorize, ecodes
 import os
 
 # Initialize canvas
-gamepad = InputDevice("/dev/input/event2")
+gamepad = InputDevice("/dev/input/event1")
 
 # Initialize the canvas
 canvas = c.Canvas()
@@ -74,6 +74,7 @@ main_scene = True
 games_scene = GamesScene()
 
 def demo_action():
+    global canvas
     print("demos")
     canvas.clear()
     canvas.draw()
@@ -89,6 +90,7 @@ def main_action():
     main_scene = True
 
 def shutdown():
+    global canvas
     print("shutdown")
     canvas.clear()
     canvas.draw()
@@ -97,7 +99,7 @@ def shutdown():
 
 # Keyboard event handlers
 def on_key_w():
-    global selected_index, countdown_value, countdown_expired
+    global selected_index, countdown_value, countdown_expired, canvas
     if main_scene:
         selected_index = (selected_index - 1) % len(options)
     else:
@@ -106,7 +108,7 @@ def on_key_w():
     countdown_expired = False
 
 def on_key_s():
-    global selected_index, countdown_value, countdown_expired
+    global selected_index, countdown_value, countdown_expired, canvas
     if main_scene:
         selected_index = (selected_index + 1) % len(options)
     else:
@@ -115,7 +117,7 @@ def on_key_s():
     countdown_expired = False
 
 def on_key_j():
-    global countdown_value, countdown_expired
+    global countdown_value, countdown_expired, canvas
     if main_scene:
         actions[selected_index]()
     else:
