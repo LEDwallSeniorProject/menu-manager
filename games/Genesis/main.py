@@ -8,7 +8,7 @@ text = s.Phrase(
     auto_newline=True,
 )
 
-for i in range(100):
+for i in range(400):
     canvas.clear()
     text.translate(0, -1)
     canvas.add(text)
