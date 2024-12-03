@@ -1,39 +1,35 @@
 import sys
-from matrix_library import shapes as s, canvas as c
+import matrix_library as matrix
 import time
-from evdev import InputDevice, categorize, ecodes
 import os
 
-# Initialize canvas
-bt1device = "/dev/input/event1"
-#print(f"Checking for Bluetooth adapter at {bt1device}")
-while os.path.exists(bt1device) == False:
-    time.sleep(1)
-gamepad = InputDevice(bt1device)
+# Initialize controller
+controller = matrix.Controller()
 
 # Initialize the canvas
-canvas = c.Canvas()
+canvas = matrix.Canvas()
 
 # Create shapes and phrases for main menu
-square = s.Polygon(s.get_polygon_vertices(4, 60, (0, 100)), (90, 200, 90))
-headerline = s.Line((3, 28), (115, 28), (255, 255, 255), thickness=1)
-menuheader = s.Phrase("MENU", (2, 0), (255, 255, 255), size=3.5, auto_newline=True)
-demoheader = s.Phrase("Demos", (0, 33), (255, 255, 255), size=3, auto_newline=True)
-gamesheader = s.Phrase("Games", (0, 60), (255, 255, 255), size=3, auto_newline=True)
-creatornames = s.Phrase("created by Alex Ellie and Palmer", (0, 100), (255, 255, 255), size=1)
+square = matrix.Polygon(matrix.get_polygon_vertices(4, 60, (0, 100)), (90, 200, 90))
+headerline = matrix.Line((3, 28), (115, 28), (255, 255, 255), thickness=1)
+menuheader = matrix.Phrase("MENU", (2, 0), (255, 255, 255), size=3.5, auto_newline=True)
+demoheader = matrix.Phrase("Demos", (0, 33), (255, 255, 255), size=3, auto_newline=True)
+gamesheader = matrix.Phrase("Games", (0, 60), (255, 255, 255), size=3, auto_newline=True)
+creatornames = matrix.Phrase("created by Alex Ellie and Palmer", (0, 100), (255, 255, 255), size=1)
 
 # Countdown setup
 countdown_value = 16
-countdown_display = s.Phrase(str(countdown_value), (110, 119), (255, 255, 255), size=1, auto_newline=True)
+countdown_display = matrix.Phrase(str(countdown_value), (110, 119), (255, 255, 255), size=1, auto_newline=True)
 countdown_expired = False
 
 # Main menu options and selection
+exited = False
 options = [demoheader, gamesheader]
 selected_index = 0
 actions = [lambda: demo_action(), lambda: games_action()]
 
 # Initialize selectors
-selector = s.Polygon(s.get_polygon_vertices(4, 12, (20, 120)), (0, 255, 0))
+selector = matrix.Polygon(matrix.get_polygon_vertices(4, 12, (20, 120)), (0, 255, 0))
 
 # Games scene to manage game folders
 class GamesScene:
@@ -78,12 +74,12 @@ main_scene = True
 games_scene = GamesScene()
 
 def demo_action():
-    global canvas
+    global canvas, exited
     print("demos")
     canvas.clear()
     canvas.draw()
-    del canvas
-    sys.exit(0)
+    time.sleep(0.15)
+    exited = True
 
 def games_action():
     global main_scene
@@ -94,15 +90,15 @@ def main_action():
     main_scene = True
 
 def shutdown():
-    global canvas
+    global canvas, exited
     print("shutdown")
     canvas.clear()
     canvas.draw()
-    del canvas
-    sys.exit(0)
+    time.sleep(0.15)
+    exited = True
 
 # Keyboard event handlers
-def on_key_w():
+def on_up():
     global selected_index, countdown_value, countdown_expired, canvas
     if main_scene:
         selected_index = (selected_index - 1) % len(options)
@@ -111,7 +107,7 @@ def on_key_w():
     countdown_value = 16
     countdown_expired = False
 
-def on_key_s():
+def on_down():
     global selected_index, countdown_value, countdown_expired, canvas
     if main_scene:
         selected_index = (selected_index + 1) % len(options)
@@ -120,8 +116,8 @@ def on_key_s():
     countdown_value = 16
     countdown_expired = False
 
-def on_key_j():
-    global countdown_value, countdown_expired, canvas
+def on_y():
+    global countdown_value, countdown_expired, canvas, exited
     if main_scene:
         actions[selected_index]()
     else:
@@ -130,55 +126,47 @@ def on_key_j():
             print(f"game/{selected_game}")
             canvas.clear()
             canvas.draw()
-            del canvas
-            sys.exit(0)
+            time.sleep(0.15)
+            exited = True
     countdown_value = 16
     countdown_expired = False
 
-def on_key_a():
+def on_left():
     if not main_scene:
         games_scene.previous_page()
 
-def on_key_d():
+def on_right():
     if not main_scene:
         games_scene.next_page()
 
-def on_key_l():
+def on_a():
     if not main_scene:
         main_action()
 
-# keyboard.on_press_key("w", lambda _: on_key_w())
-# keyboard.on_press_key("s", lambda _: on_key_s())
-# keyboard.on_press_key("x", lambda _: on_key_x())
-# keyboard.on_press_key("a", lambda _: on_key_a())
-# keyboard.on_press_key("d", lambda _: on_key_d())
-# keyboard.on_press_key("c", lambda _: on_key_c())
-
 # Main loop
-fps = 15
+fps = 30
 frame_time = 1 / fps
 last_frame_time = time.time()
 
-while True:
-    # current_time = time.time()
-    # elapsed_time = current_time - last_frame_time
+controller.add_function("UP",on_up)
+controller.add_function("DOWN",on_down)
+controller.add_function("LEFT",on_left)
+controller.add_function("RIGHT",on_right)
+controller.add_function("Y",on_y)
+controller.add_function("A",on_a)
+controller.add_function("SELECT",shutdown)
 
-    # if elapsed_time >= frame_time:
-    #     last_frame_time = current_time
-    #     canvas.clear()
+while True:
     
+    # Clear the canvas and redraw
     canvas.clear()
     time.sleep(0.15)
-    if main_scene:
 
-        if gamepad.active_keys() == [46]:
-            on_key_w()
-        if gamepad.active_keys() == [32]:
-            on_key_s()
-        if gamepad.active_keys() == [23]:
-            on_key_j()
-        if gamepad.active_keys() == [49]:
-            shutdown()
+    # check if exited
+    if exited: sys.exit(0)
+
+    # draw different items based on where I am
+    if main_scene:
 
         selected_option = options[selected_index]
         
@@ -225,25 +213,10 @@ while True:
         canvas.add(selector)
     
     else:
-        
-        if gamepad.active_keys() == [46]:
-            on_key_w()
-        if gamepad.active_keys() == [18]:
-            on_key_a()
-        if gamepad.active_keys() == [32]:
-            on_key_s()
-        if gamepad.active_keys() == [33]:
-            on_key_d()
-        if gamepad.active_keys() == [23]:
-            on_key_j()
-        if gamepad.active_keys() == [34]:
-            on_key_l()
-        if gamepad.active_keys() == [49]:
-            shutdown()
 
         game_names = games_scene.get_current_page()
         for i, game in enumerate(game_names):
-            game_phrase = s.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
+            game_phrase = matrix.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
             canvas.add(game_phrase)
         
         selected_game = games_scene.get_selected_game()
