@@ -156,6 +156,14 @@ controller.add_function("Y",on_y)
 controller.add_function("A",on_a)
 controller.add_function("SELECT",shutdown)
 
+controller.add_function("UP2",on_up)
+controller.add_function("DOWN2",on_down)
+controller.add_function("LEFT2",on_left)
+controller.add_function("RIGHT2",on_right)
+controller.add_function("Y2",on_y)
+controller.add_function("A2",on_a)
+controller.add_function("SELECT2",shutdown)
+
 while True:
     
     # Clear the canvas and redraw
