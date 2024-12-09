@@ -2,9 +2,6 @@ from matrix_library import canvas as c, shapes as s, controller as con
 import time
 import sys
 
-from evdev import InputDevice, categorize, ecodes
-
-game_pad = InputDevice("/dev/input/event1")
 controller = con.Controller()
 
 canvas = c.Canvas()
