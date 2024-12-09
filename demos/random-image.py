@@ -1,4 +1,3 @@
-# Imports
 from PIL import Image
 import matrix_library as matrix
 import zmq
