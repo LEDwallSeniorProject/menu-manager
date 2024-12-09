@@ -5,9 +5,6 @@ import sys
 from threading import Thread
 import matrix_library as matrix
 
-import io
-from contextlib import redirect_stdout
-
 canvas = matrix.Canvas()
 
 class ThreadWithReturnValue(Thread):
@@ -27,12 +24,8 @@ class ThreadWithReturnValue(Thread):
 
 def run_program(program):
     print("Running program:", program)
-    # result = subprocess.run([sys.executable,program], capture_output=True, text=True)
-    # return result.stdout.rstrip()
-    f = io.StringIO()
-    with redirect_stdout(f):
-        exec(open(program).read())
-    return f.getvalue().rstrip()
+    result = subprocess.run([sys.executable,program], capture_output=True, text=True)
+    return result.stdout.rstrip()
 
 def run_shutdown():
 	result = subprocess.run(["/usr/bin/sudo","/usr/sbin/halt"], capture_output=True, text=True)
