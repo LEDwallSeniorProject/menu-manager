@@ -1,21 +1,27 @@
-from matrix_library import shapes as s, canvas as c
+import sys
+import matrix_library as matrix
 import time
-import random
-from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event1")
+controller = matrix.Controller()
+canvas = matrix.Canvas()
 
-canvas = c.Canvas()
-circle = s.Circle(10, (64, 96), (0, 255, 0))
+exited = False
+circle = matrix.Circle(10, (64, 96), (0, 255, 0))
 particles = []
-
 
 def distance(x1, y1, x2, y2):
     """Compute the distance between two points."""
     return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
 
+def exit_prog():
+    global canvas, exited
+    print("quit")
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.15)
+    exited = True
 
-class Particle(s.Circle):
+class Particle(matrix.Circle):
     def __init__(self, radius, center, color, velocity_x, velocity_y):
         super().__init__(radius, center, color)
         self.velocity_x = velocity_x
@@ -27,11 +33,6 @@ class Particle(s.Circle):
         return self.radius + other.radius >= distance(
             self.center[0], self.center[1], other.center[0], other.center[1]
         )
-
-    def exit_prog():
-        print("quit")
-        canvas.delete()
-        sys.exit()
 
     def bounce(self, other: "Particle"):
         if not self.hits(other):
@@ -74,11 +75,13 @@ particles.append(particle)
 particle = Particle(6, (64, 75), (255, 255, 0), -2, -3)
 particles.append(particle)
 
+controller.add_function("START", exit_prog)
+
 counter = 0
 while counter <= 200:
 
-    if gamepad.active_keys() == [24]:
-        exit_prog()
+    # check if exited
+    if exited: sys.exit(0)
 
     # Calculate the new position of the particles
     for particle in particles:

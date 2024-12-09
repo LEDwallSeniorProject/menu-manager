@@ -1,18 +1,19 @@
-from matrix_library import shapes as s, canvas as c
+import sys
+import matrix_library as matrix
 import time
-from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event1")
+controller = matrix.Controller()
+canvas = matrix.Canvas()
 
-canvas = c.Canvas()
+exited = False
 thickness = 2
-triangle = s.Polygon(s.get_polygon_vertices(3, 20, (32, 32)), (255, 0, 0))
-square = s.Polygon(s.get_polygon_vertices(4, 20, (96, 32)), (0, 255, 0))
-pentagon = s.Polygon(s.get_polygon_vertices(5, 20, (64, 64)), (0, 0, 255))
-hexagon = s.Polygon(s.get_polygon_vertices(6, 20, (32, 96)), (255, 255, 0))
-heptagon = s.Polygon(s.get_polygon_vertices(7, 20, (96, 96)), (0, 255, 255))
+triangle = matrix.Polygon(matrix.get_polygon_vertices(3, 20, (32, 32)), (255, 0, 0))
+square = matrix.Polygon(matrix.get_polygon_vertices(4, 20, (96, 32)), (0, 255, 0))
+pentagon = matrix.Polygon(matrix.get_polygon_vertices(5, 20, (64, 64)), (0, 0, 255))
+hexagon = matrix.Polygon(matrix.get_polygon_vertices(6, 20, (32, 96)), (255, 255, 0))
+heptagon = matrix.Polygon(matrix.get_polygon_vertices(7, 20, (96, 96)), (0, 255, 255))
 
-fps_text = s.Phrase("FPS: ...", [0, 0])
+fps_text = matrix.Phrase("FPS: ...", [0, 0])
 
 polygons = [triangle, square, pentagon, hexagon, heptagon]
 
@@ -25,18 +26,18 @@ frame_times = []
 
 frame = 0
 
-
 def exit_prog():
+    global canvas, exited
     print("quit")
-    canvas.delete()
-    sys.exit()
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.15)
+    exited = True
 
+controller.add_function("START", exit_prog)
 
 while True:
-
-    if gamepad.active_keys() == [24]:
-        exit_prog()
-
+    if exited: sys.exit(0)
     # if frame % 100 == 0 and frame != 0:
     #     print(f"Frame {frame}")
     #     print(f"Clear: {sum(clear_times) / len(clear_times)}")
