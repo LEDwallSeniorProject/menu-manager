@@ -37,39 +37,6 @@ food_spawned = True
 food_pos = [16, 8]
 
 
-
-def exit_prog():
-    del canvas
-    sys.exit()
-
-
-def move_up():
-    global snake_dir
-    snake_dir = [0, -1]
-
-
-def move_down():
-    global snake_dir
-    snake_dir = [0, 1]
-
-
-def move_left():
-    global snake_dir
-    snake_dir = [-1, 0]
-
-
-def move_right():
-    global snake_dir
-    snake_dir = [1, 0]
-
-
-controller.add_function("UP", move_up)
-controller.add_function("DOWN", move_down)
-controller.add_function("LEFT", move_left)
-controller.add_function("RIGHT", move_right)
-controller.add_function("START", exit_prog)
-
-frame = 0
 while not game_over:
 
     if snake_pos == food_pos:
@@ -111,13 +78,8 @@ while not game_over:
     snake_pos[0] += snake_dir[0]
     snake_pos[1] += snake_dir[1]
 
-        if (
-            snake_pos[0] < 0
-            or snake_pos[0] >= 33
-            or snake_pos[1] < 0
-            or snake_pos[1] >= 33
-        ):
-            game_over = True
+    if snake_pos[0] < 0 or snake_pos[0] >= 33 or snake_pos[1] < 0 or snake_pos[1] >= 33:
+        game_over = True
 
     if snake_pos in snake_body:
         game_over = True
