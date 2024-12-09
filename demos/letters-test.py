@@ -1,16 +1,28 @@
-from matrix_library import canvas as c, shapes as s
 import string
+import sys
+import matrix_library as matrix
 import time
-from evdev import InputDevice, categorize, ecodes
 
-gamepad = InputDevice("/dev/input/event1")
+controller = matrix.Controller()
+canvas = matrix.Canvas()
 
-canvas = c.Canvas()
+exited = False
 alphabet = ''
-for i in string.ascii_lowercase:
 
+def exit_prog():
+    global canvas, exited
+    print("quit")
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.15)
+    exited = True
+
+controller.add_function("START", exit_prog)
+
+for i in string.ascii_lowercase:
+    if exited: sys.exit(0)
     alphabet += i
-    test = s.Phrase(
+    test = matrix.Phrase(
         alphabet,
         (0, 0),
         (255, 255, 255),

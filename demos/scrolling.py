@@ -1,21 +1,28 @@
-from matrix_library import canvas as c, shapes as s
-from evdev import InputDevice, categorize, ecodes
+import sys
+import matrix_library as matrix
+import time
 
-gamepad = InputDevice("/dev/input/event1")
+controller = matrix.Controller()
+canvas = matrix.Canvas()
 
-canvas = c.Canvas()
-
-text = s.Phrase("Welcome to Calvin!", [32, 64], size=6)
+exited = False
+text = matrix.Phrase("Welcome to Calvin!", [32, 64], size=6)
 
 def exit_prog():
-    print(quit)
-    canvas.delete()
-    sys.exit()
+    global canvas, exited
+    print("quit")
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.15)
+    exited = True
+
+controller.add_function("START", exit_prog)
 
 counter = 0
 while counter <= 450:
-    if gamepad.active_keys() == [24]:
-        exit_prog()
+
+    # check if exited
+    if exited: sys.exit(0)
 
     canvas.clear()
     text.translate(-2, 0)

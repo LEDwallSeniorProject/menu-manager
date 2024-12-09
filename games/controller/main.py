@@ -73,7 +73,7 @@ def shutdown():
     print("Pressed button START or START2")
     global phrase
     phrase.set_text("Shutdown via START or START2")
-    time.sleep(3)
+    time.sleep(1.5)
 
     global running
     running = False
