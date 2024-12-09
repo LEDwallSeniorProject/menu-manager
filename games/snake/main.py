@@ -1,10 +1,11 @@
-from matrix_library import canvas as c, shapes as s
+from matrix_library import canvas as c, shapes as s, controller as con
 import time
 import sys
 
 from evdev import InputDevice, categorize, ecodes
 
 game_pad = InputDevice("/dev/input/event1")
+controller = con.Controller()
 
 canvas = c.Canvas()
 
@@ -18,9 +19,37 @@ game_over = False
 food_spawned = False
 food_pos = [16, 8]
 
+
 def exit_prog():
     del canvas
     sys.exit()
+
+
+def move_up():
+    global snake_dir
+    snake_dir = [0, -1]
+
+
+def move_down():
+    global snake_dir
+    snake_dir = [0, 1]
+
+
+def move_left():
+    global snake_dir
+    snake_dir = [-1, 0]
+
+
+def move_right():
+    global snake_dir
+    snake_dir = [1, 0]
+
+
+controller.add_function("UP", move_up)
+controller.add_function("DOWN", move_down)
+controller.add_function("LEFT", move_left)
+controller.add_function("RIGHT", move_right)
+controller.add_function("START", exit_prog)
 
 frame = 0
 while not game_over:
@@ -30,16 +59,16 @@ while not game_over:
 
     # start = time.time()
     # while time.time() - start < 0.25:
-    if game_pad.active_keys() == [46]:
-        snake_dir = [0, -1]
-    elif game_pad.active_keys() == [33]:
-        snake_dir = [1, 0]
-    elif game_pad.active_keys() == [32]:
-        snake_dir = [0, 1]
-    elif game_pad.active_keys() == [18]:
-        snake_dir = [-1, 0]
-    elif game_pad.active_keys() == [24]:
-        exit_prog()
+    # if game_pad.active_keys() == [46]:
+    #     snake_dir = [0, -1]
+    # elif game_pad.active_keys() == [33]:
+    #     snake_dir = [1, 0]
+    # elif game_pad.active_keys() == [32]:
+    #     snake_dir = [0, 1]
+    # elif game_pad.active_keys() == [18]:
+    #     snake_dir = [-1, 0]
+    # elif game_pad.active_keys() == [24]:
+    #     exit_prog()
 
     canvas.clear()
 
@@ -71,7 +100,12 @@ while not game_over:
         snake_pos[0] += snake_dir[0]
         snake_pos[1] += snake_dir[1]
 
-        if snake_pos[0] < 0 or snake_pos[0] >= 33 or snake_pos[1] < 0 or snake_pos[1] >= 33:
+        if (
+            snake_pos[0] < 0
+            or snake_pos[0] >= 33
+            or snake_pos[1] < 0
+            or snake_pos[1] >= 33
+        ):
             game_over = True
 
         if snake_pos in snake_body:
