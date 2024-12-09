@@ -1,21 +1,23 @@
 # Imports
 from PIL import Image
+import matrix_library as matrix
 import zmq
 import time
-from evdev import InputDevice, categorize, ecodes
 import requests
 import io
 import sys
 
-gamepad = InputDevice("/dev/input/event1")
+# program setup
+controller = matrix.Controller()
+# canvas = matrix.Canvas()
 
 def exit_prog():
-    print(quit)
-    # canvas.delete()
-    sys.exit()
-
-# # program setup
-# canvas = c.Canvas()
+    global canvas, exited
+    print("quit")
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.15)
+    exited = True
 
 # Create the ZMQ connection
 context = zmq.Context()
@@ -28,6 +30,8 @@ socket.connect("tcp://localhost:55000")
 # random picture URL
 w = h = 128
 url = f"https://picsum.photos/{w}"
+
+controller.add_function("START", exit_prog)
 
 for i in range(0,3):
     r = requests.get(url, stream=True)
@@ -49,6 +53,5 @@ for i in range(0,3):
         message = socket.recv()
 
     for j in range(0,100):
-        if gamepad.active_keys() == [24]:
-            exit_prog()
+        if exited: sys.exit(0)
         time.sleep(0.05)
