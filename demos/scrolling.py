@@ -5,7 +5,7 @@ gamepad = InputDevice("/dev/input/event1")
 
 canvas = c.Canvas()
 
-text = s.Phrase("WOW!", [64, 64], size=8)
+text = s.Phrase("Welcome to Calvin!", [32, 64], size=6)
 
 def exit_prog():
     print(quit)
@@ -13,7 +13,7 @@ def exit_prog():
     sys.exit()
 
 counter = 0
-while counter <= 150:
+while counter <= 450:
     if gamepad.active_keys() == [24]:
         exit_prog()
 
