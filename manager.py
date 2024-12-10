@@ -43,6 +43,10 @@ img = matrix.Image(width=128, height=128, position=[0,0])
 img.loadfile(filename="startup.png")
 canvas.add(img)
 canvas.draw()
+time.sleep(1)
+
+# Wait for controllers
+controller = matrix.Controller()
 
 while True:
     # run main program

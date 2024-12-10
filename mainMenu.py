@@ -23,6 +23,7 @@ countdown_display = matrix.Phrase(str(countdown_value), (110, 119), (255, 255, 2
 countdown_expired = False
 
 # Main menu options and selection
+paused = False
 exited = False
 options = [demoheader, gamesheader]
 selected_index = 0
@@ -99,7 +100,7 @@ def shutdown():
 
 # Keyboard event handlers
 def on_up():
-    global selected_index, countdown_value, countdown_expired, canvas
+    global selected_index, countdown_value, countdown_expired
     if main_scene:
         selected_index = (selected_index - 1) % len(options)
     else:
@@ -108,7 +109,7 @@ def on_up():
     countdown_expired = False
 
 def on_down():
-    global selected_index, countdown_value, countdown_expired, canvas
+    global selected_index, countdown_value, countdown_expired
     if main_scene:
         selected_index = (selected_index + 1) % len(options)
     else:
@@ -143,11 +144,16 @@ def on_a():
     if not main_scene:
         main_action()
 
+def on_bumpers():
+    global paused
+    paused = not paused
+
 # Main loop
 fps = 20
 frame_time = 1 / fps
 last_frame_time = time.time()
 
+# Add controller funcions
 controller.add_function("UP",on_up)
 controller.add_function("DOWN",on_down)
 controller.add_function("LEFT",on_left)
@@ -155,6 +161,8 @@ controller.add_function("RIGHT",on_right)
 controller.add_function("Y",on_y)
 controller.add_function("A",on_a)
 controller.add_function("SELECT",shutdown)
+controller.add_function("RB",on_bumpers)
+controller.add_function("LB",on_bumpers)
 
 controller.add_function("UP2",on_up)
 controller.add_function("DOWN2",on_down)
@@ -163,6 +171,9 @@ controller.add_function("RIGHT2",on_right)
 controller.add_function("Y2",on_y)
 controller.add_function("A2",on_a)
 controller.add_function("SELECT2",shutdown)
+controller.add_function("RB2",on_bumpers)
+controller.add_function("LB2",on_bumpers)
+
 
 while True:
     
@@ -172,6 +183,12 @@ while True:
 
     # check if exited
     if exited: sys.exit(0)
+
+    # if I'm paused, show a black screen
+    if paused:
+        canvas.draw()
+        time.sleep(0.15)
+        continue
 
     # draw different items based on where I am
     if main_scene:
