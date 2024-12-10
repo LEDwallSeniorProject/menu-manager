@@ -144,7 +144,7 @@ def on_a():
         main_action()
 
 # Main loop
-fps = 30
+fps = 20
 frame_time = 1 / fps
 last_frame_time = time.time()
 
@@ -210,22 +210,23 @@ while True:
         else:
             countdown_display.set_position((110, 119))
 
-        # Draw everything
-        canvas.add(square)
-        canvas.add(headerline)
-        canvas.add(menuheader)
-        canvas.add(demoheader)
-        canvas.add(gamesheader)
-        canvas.add(creatornames)
-        canvas.add(countdown_display)
-        canvas.add(selector)
+        # Draw everything (check again for exited)
+        if not exited:
+            canvas.add(square)
+            canvas.add(headerline)
+            canvas.add(menuheader)
+            canvas.add(demoheader)
+            canvas.add(gamesheader)
+            canvas.add(creatornames)
+            canvas.add(countdown_display)
+            canvas.add(selector)
     
     else:
 
         game_names = games_scene.get_current_page()
         for i, game in enumerate(game_names):
             game_phrase = matrix.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
-            canvas.add(game_phrase)
+            if not exited: canvas.add(game_phrase)
         
         selected_game = games_scene.get_selected_game()
         if selected_game:
@@ -240,6 +241,10 @@ while True:
             
             # Move selector to new position
             selector.translate(dx, dy)
-            canvas.add(selector)
-        
+            if not exited: canvas.add(selector)
+
+    # last check to see if I'm exited -- if so, clear the canvas
+    if exited: canvas.clear()    
+
+    # draw the canvas
     canvas.draw()

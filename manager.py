@@ -24,6 +24,9 @@ class ThreadWithReturnValue(Thread):
 
 def run_program(program):
     print("Running program:", program)
+    canvas.clear()
+    canvas.draw()
+    time.sleep(0.25)
     result = subprocess.run([sys.executable,program], capture_output=True, text=True)
     return result.stdout.rstrip()
 
@@ -40,7 +43,6 @@ img = matrix.Image(width=128, height=128, position=[0,0])
 img.loadfile(filename="startup.png")
 canvas.add(img)
 canvas.draw()
-time.sleep(2)
 
 while True:
     # run main program
