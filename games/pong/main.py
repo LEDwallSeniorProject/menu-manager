@@ -61,23 +61,38 @@ class PongGame:
 
     def setup_controllers(self):
         # Menu state controls
+        # Both controllers should work for this
         if self.game_state == MENU_STATE:
             self.controller.add_function("UP", self.menu_move_up)
             self.controller.add_function("DOWN", self.menu_move_down)
             self.controller.add_function("Y", self.select_game_mode)
             self.controller.add_function("START", self.exit_prog)
 
+            self.controller.add_function("UP2", self.menu_move_up)
+            self.controller.add_function("DOWN2", self.menu_move_down)
+            self.controller.add_function("Y2", self.select_game_mode)
+            self.controller.add_function("START2", self.exit_prog)
+
         # Game state controls
+        # Setup player 1 and 2 states
         elif self.game_state in [ONE_PLAYER_STATE, TWO_PLAYER_STATE]:
+            # setup player 1
             self.controller.add_function("UP", self.move_player1_up)
             self.controller.add_function("DOWN", self.move_player1_down)
-            
+
             # For two-player mode, add second player controls
             if self.game_state == TWO_PLAYER_STATE:
                 self.controller.add_function("UP2", self.move_player2_up)
                 self.controller.add_function("DOWN2", self.move_player2_down)
+
+            # For a single player game, both controllers should work for player 1
+            else:
+                self.controller.add_function("UP2", self.move_player1_up)
+                self.controller.add_function("DOWN2", self.move_player1_down)
             
+            # Both START buttons should exit
             self.controller.add_function("START", self.exit_prog)
+            self.controller.add_function("START2", self.exit_prog)
 
     def menu_move_up(self):
         self.selected_menu_index = (self.selected_menu_index - 1) % len(self.menu_options)
