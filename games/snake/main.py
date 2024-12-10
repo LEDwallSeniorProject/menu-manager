@@ -36,6 +36,7 @@ game_over = False
 food_spawned = True
 food_pos = [16, 8]
 
+
 while not game_over:
 
     if snake_pos == food_pos:
