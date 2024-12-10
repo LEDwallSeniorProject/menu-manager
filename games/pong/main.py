@@ -15,11 +15,11 @@ class PongGame:
         self.PADDLE_WIDTH = 8
         self.PADDLE_HEIGHT = 40
         self.PADDLE_SPEED = 6
-        self.BALL_SPEED = 3
+        self.BALL_SPEED = 5
         self.AI_REACTION_SPEED = 2
         self.VELOCITY_VARIATION_AMOUNT = 1.5
-        self.MIN_SPEED = 2
-        self.MAX_SPEED = 5
+        self.MIN_SPEED = 3
+        self.MAX_SPEED = 8
 
         # Game state variables
         self.controller = matrix.Controller()
