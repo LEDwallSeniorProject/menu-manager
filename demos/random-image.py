@@ -23,7 +23,7 @@ url = f"https://picsum.photos/{w}"
 
 controller.add_function("START", exit_prog)
 
-for i in range(0,3):
+for i in range(0,2):
     if not exited:
         
         canvas.add(loading)
