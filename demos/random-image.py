@@ -56,5 +56,8 @@ for i in range(0,2):
     
 
 # clear the screen before exiting
+canvas.clear()
+canvas.draw()
+time.sleep(0.15)
 print("quit")
 sys.exit(0)
