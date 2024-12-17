@@ -222,7 +222,7 @@ class PongGame:
     def update_game(self, move_counter):
         # Initial countdown logic (only at the start of the game)
         if self.initial_countdown and self.countdown_timer > 0:
-            self.countdown_timer -= 1/30
+            self.countdown_timer -= 1/15
             countdown_text = matrix.Phrase(
                 str(int(self.countdown_timer) + 1), 
                 [56, 30],  # Moved higher on the screen

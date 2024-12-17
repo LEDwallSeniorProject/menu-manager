@@ -149,7 +149,7 @@ def on_bumpers():
     paused = not paused
 
 # Main loop
-fps = 20
+fps = 30
 frame_time = 1 / fps
 last_frame_time = time.time()
 
@@ -179,7 +179,7 @@ while True:
     
     # Clear the canvas and redraw
     canvas.clear()
-    time.sleep(0.15)
+    # time.sleep(0.15)
 
     # check if exited
     if exited: sys.exit(0)
