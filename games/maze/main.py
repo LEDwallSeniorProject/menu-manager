@@ -2,6 +2,7 @@
 
 from matrix_library import canvas as c, shapes as s, Controller as ctrl
 from random import randint
+import time, sys
 
 class maze_app:
     """An app which produces a maze
@@ -17,6 +18,8 @@ class maze_app:
     self.matrix: a matrix containing each point in the 128x128 grid, and what color to print it
     
     self.coord: a store of which coordinate is being worked on
+
+    self.running: a boolean that says whether the game is being played right now
     
     Functions
     ---------
@@ -103,11 +106,38 @@ class maze_app:
         self.canvas.add(s.Pixel((2*self.coord[0]-1, 2*self.coord[1]-1),(200,50,100)))
         #draws the initial position of the character
 
-        while True:
+        # start the game
+        self.running = True
+
+        while self.running:
             self.canvas.draw()
+            time.sleep(0.1)
             #update the canvas as the objects on it change
+
+        # print game over!
+        self.canvas.clear()
+        self.canvas.add(s.Phrase("GAME OVER", [32, 64], size=1))
+        self.canvas.draw()
+        time.sleep(2)
+
             
-          
+    def quit(self):
+        """ Quits the program
+        
+        Parameters
+        ----------
+        Nothing
+
+        Returns
+        -------
+        Nothing
+    
+        Side effects
+        ------------
+        Clears the matrix
+        """
+        self.running = False
+
     def controls(self, controller):
         """Sets up Controller
         
@@ -129,6 +159,7 @@ class maze_app:
         controller.add_function("LEFT",self.move_left)
         controller.add_function("DOWN",self.move_down)
         controller.add_function("RIGHT",self.move_right)
+        controller.add_function("START",self.quit)
         return(controller)
     
           
@@ -531,3 +562,7 @@ class maze_app:
 #To finish things off, simply initialize the program by calling maze_app()
 
 maze_app()
+
+# Clean quit here
+print("quit")
+sys.exit(0)
