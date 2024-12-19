@@ -1,4 +1,6 @@
-# Author: Ben Skillen bcs29@calvin.edu 2024-12-17
+# Author: Ben Skillen <bcs29@calvin.edu>
+# Minor modifications by: Chris Wieringa <cwieri39@calvin.edu>
+# Date: 2024-12-17
 
 from matrix_library import canvas as c, shapes as s, Controller as ctrl
 from random import randint
