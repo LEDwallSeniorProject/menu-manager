@@ -98,6 +98,9 @@ def shutdown():
     time.sleep(0.15)
     exited = True
 
+    # do the safe shutdown
+    os.system("sudo shutdown -h now")
+
 # Keyboard event handlers
 def on_up():
     global selected_index, countdown_value, countdown_expired
