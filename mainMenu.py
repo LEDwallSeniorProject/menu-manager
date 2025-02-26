@@ -1,13 +1,16 @@
-from LEDWall import *
+from matrix_library import LEDWall, Canvas, Controller, shapes
+import os 
 
 WHITE = (255,255,255)
 BLUE = (50,100,255)
 
-class MainMenu(LEDProgram):
+class MainMenu(LEDWall.LEDProgram):
     def __init__(self, canvas, controller):
         self.queued = None
         self.selection = 0
-        self.options = ['Demos', 'Games', 'About', 'Exit']
+        self.options = []
+        self.getOptions()
+
         
         #begin the code
         super().__init__(canvas, controller)
@@ -20,13 +23,13 @@ class MainMenu(LEDProgram):
     def __draw__(self):
         titleColor = (50, 255, 50)
 
-        title = Shapes.Phrase("MENU", (self.canvas.width/2, 5), titleColor, size=1.5)
+        title = shapes.Phrase("MENU", (self.canvas.width/2, 5), titleColor, size=1.5)
         title.translate(0-title.get_width()/2, 0)
         self.canvas.add(title)
 
         for index, item in enumerate(self.options):
             itemColor = WHITE if self.selection != index else BLUE
-            option = Shapes.Phrase(item, (self.canvas.width/2, self.canvas.height/4 +index*12), itemColor)
+            option = shapes.Phrase(item, (self.canvas.width/2, self.canvas.height/4 +index*12), itemColor)
             option.translate(0-option.get_width()/2, 0)
             self.canvas.add(option)
 
@@ -47,25 +50,27 @@ class MainMenu(LEDProgram):
     def enter(self):
         self.running = False
 
-        if self.options[self.selection] == 'Games':
-            import gamesMenu
-            self.queued = gamesMenu.GamesMenu
         
-        elif self.options[self.selection] == 'Demos':
-            import demoMenu
-            self.queued = demoMenu.DemoMenu
-        
-        elif self.options[self.selection] == 'About':
-            import aboutMenu
-            self.queued = aboutMenu.AboutMenu
 
-        elif self.options[self.selection] == 'Exit':
+        if self.options[self.selection] == 'Exit':
             self.exit()
         
         else:
             raise RuntimeError("Code Error; No Item Selected")
 
+    def getOptions(self):
+        try:
+            with os.scandir() as directory:
+                for handle in directory:
+                    if not handle.name.startswith('.') and not handle.name.startswith('__') and handle.is_dir():
+                        self.options.append(handle.name)
+                        
+        except Exception as e:
+            raise Exception("Something went wrong trying to look for options in the current directory") from e
+        
+        self.options.sort()
+        self.options.append('Exit')
 
 if __name__ == "__main__":
-    MainMenu(matrix.Canvas(), matrix.Controller())
+    MainMenu(Canvas(), Controller())
     

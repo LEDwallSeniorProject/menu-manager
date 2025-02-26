@@ -9,7 +9,7 @@ from random import randrange
 
 # Initializing the canvas
 canvas = c.Canvas()
-controller = cont.Controller()
+controller = cont.Controller(debug=True)
 
 # Defining the variables needed
 frog_x = 65
