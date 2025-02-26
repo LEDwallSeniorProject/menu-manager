@@ -3,14 +3,15 @@ from LEDWall import *
 WHITE = (255,255,255)
 BLUE = (50,100,255)
 
-class MainMenu(LEDProgram):
+class GamesMenu(LEDProgram):
     def __init__(self, canvas, controller):
         self.queued = None
         self.selection = 0
-        self.options = ['Demos', 'Games', 'About', 'Exit']
-        
+        self.options = ['a', 'b', 'c']
+
         #begin the code
         super().__init__(canvas, controller)
+
 
     def __loop__(self):
         super().__loop__()
@@ -47,25 +48,18 @@ class MainMenu(LEDProgram):
     def enter(self):
         self.running = False
 
-        if self.options[self.selection] == 'Games':
+        if self.options[self.selection] == 'a':
             import gamesMenu
             self.queued = gamesMenu.GamesMenu
-        
-        elif self.options[self.selection] == 'Demos':
-            import demoMenu
-            self.queued = demoMenu.DemoMenu
-        
-        elif self.options[self.selection] == 'About':
-            import aboutMenu
-            self.queued = aboutMenu.AboutMenu
 
-        elif self.options[self.selection] == 'Exit':
+        elif self.options[self.selection] == 'b':
             self.exit()
-        
+
         else:
             raise RuntimeError("Code Error; No Item Selected")
-
-
+        
+        
 if __name__ == "__main__":
-    MainMenu(matrix.Canvas(), matrix.Controller())
+    GamesMenu(matrix.Canvas(), matrix.Controller())
     
+   
