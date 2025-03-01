@@ -1,5 +1,6 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
-import os 
+from os import scandir, chdir
+from importlib import import_module
 
 WHITE = (255,255,255)
 BLUE = (50,100,255)
@@ -9,9 +10,9 @@ class MainMenu(LEDWall.LEDProgram):
         self.queued = None
         self.selection = 0
         self.options = []
+        self.jumps = []
         self.getOptions()
 
-        
         #begin the code
         super().__init__(canvas, controller)
 
@@ -48,19 +49,32 @@ class MainMenu(LEDWall.LEDProgram):
         self.selection = (self.selection+1)%len(self.options)
 
     def enter(self):
-        self.running = False
-
-        
-
         if self.options[self.selection] == 'Exit':
             self.exit()
         
         else:
-            raise RuntimeError("Code Error; No Item Selected")
+            chdir(self.options[self.selection])
+            self.jumps.append(self.options[self.selection])
+            self.checkExecutable()
+            self.options = []
+            self.getOptions()
 
+    def checkExecutable(self):
+        try:
+            with scandir() as directory:
+                for handle in directory:
+                    if not handle.name.startswith('.') and handle.is_file() and handle.name == "main.py":                      
+                        self.jumps.append('main')
+                        import_module(".".join(self.jumps))
+
+                        
+        except Exception as e:
+            raise Exception("Something went wrong trying to look for or execute that program") from e
+        
+    
     def getOptions(self):
         try:
-            with os.scandir() as directory:
+            with scandir() as directory:
                 for handle in directory:
                     if not handle.name.startswith('.') and not handle.name.startswith('__') and handle.is_dir():
                         self.options.append(handle.name)
