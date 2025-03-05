@@ -12,7 +12,7 @@ Group=led
 WorkingDirectory=/home/led/git/menu-manager
 Environment="VIRTUAL_ENV=/home/led/ledwallvenv"
 Environment="PATH=$VIRTUAL_ENV/bin:$PATH"
-ExecStart=/home/led/ledwallvenv/bin/python3 /home/led/git/menu-manager/manager.py
+ExecStart=/home/led/ledwallvenv/bin/python3 /home/led/git/menu-manager/mainMenu.py
 Restart=always
 RestartSec=30
 #ProtectSystem=full

@@ -1,270 +1,135 @@
-import sys
-import matrix_library as matrix
-import time
-import os
+from matrix_library import LEDWall, Canvas, Controller, shapes
+from os import scandir, chdir, getcwd, path
+from importlib.util import spec_from_file_location, module_from_spec
 
-# Initialize controller
-controller = matrix.Controller()
-
-# Initialize the canvas
-canvas = matrix.Canvas()
-
-# Create shapes and phrases for main menu
-square = matrix.Polygon(matrix.get_polygon_vertices(4, 60, (0, 100)), (90, 200, 90))
-headerline = matrix.Line((3, 28), (115, 28), (255, 255, 255), thickness=1)
-menuheader = matrix.Phrase("MENU", (2, 0), (255, 255, 255), size=3.5, auto_newline=True)
-demoheader = matrix.Phrase("Demos", (0, 33), (255, 255, 255), size=3, auto_newline=True)
-gamesheader = matrix.Phrase("Games", (0, 60), (255, 255, 255), size=3, auto_newline=True)
-creatornames = matrix.Phrase("created by Alex Ellie and Palmer", (0, 100), (255, 255, 255), size=1)
-
-# Countdown setup
-countdown_value = 16
-countdown_display = matrix.Phrase(str(countdown_value), (110, 119), (255, 255, 255), size=1, auto_newline=True)
-countdown_expired = False
-
-# Main menu options and selection
-paused = False
-exited = False
-options = [demoheader, gamesheader]
-selected_index = 0
-actions = [lambda: demo_action(), lambda: games_action()]
-
-# Initialize selectors
-selector = matrix.Polygon(matrix.get_polygon_vertices(4, 12, (20, 120)), (0, 255, 0))
-
-# Games scene to manage game folders
-class GamesScene:
-    def __init__(self):
-        self.game_folders = self.load_game_folders()
-        self.selected_index = 0
-        self.page_index = 0
-        self.items_per_page = 7
-
-    def load_game_folders(self):
-        current_dir = os.path.dirname(__file__)
-        games_dir = os.path.join(current_dir, "games")
-        return [folder for folder in os.listdir(games_dir) if os.path.isdir(os.path.join(games_dir, folder))]
-
-    def get_current_page(self):
-        start = self.page_index * self.items_per_page
-        end = start + self.items_per_page
-        return self.game_folders[start:end]
-
-    def next_page(self):
-        if (self.page_index + 1) * self.items_per_page < len(self.game_folders):
-            self.page_index += 1
-            self.selected_index = 0
-
-    def previous_page(self):
-        if self.page_index > 0:
-            self.page_index -= 1
-            self.selected_index = 0
-
-    def select_next(self):
-        self.selected_index = (self.selected_index + 1) % len(self.get_current_page())
-
-    def select_previous(self):
-        self.selected_index = (self.selected_index - 1) % len(self.get_current_page())
-
-    def get_selected_game(self):
-        current_page = self.get_current_page()
-        return current_page[self.selected_index] if current_page else None
-
-# Scene management
-main_scene = True
-games_scene = GamesScene()
-
-def demo_action():
-    global canvas, exited
-    print("demos")
-    canvas.clear()
-    canvas.draw()
-    time.sleep(0.15)
-    exited = True
-
-def games_action():
-    global main_scene
-    main_scene = False
-
-def main_action():
-    global main_scene
-    main_scene = True
-
-def shutdown():
-    global canvas, exited
-    print("shutdown")
-    canvas.clear()
-    canvas.draw()
-    time.sleep(0.15)
-    exited = True
-
-    # do the safe shutdown
-    os.system("sudo shutdown -h now")
-
-# Keyboard event handlers
-def on_up():
-    global selected_index, countdown_value, countdown_expired
-    if main_scene:
-        selected_index = (selected_index - 1) % len(options)
-    else:
-        games_scene.select_previous()
-    countdown_value = 16
-    countdown_expired = False
-
-def on_down():
-    global selected_index, countdown_value, countdown_expired
-    if main_scene:
-        selected_index = (selected_index + 1) % len(options)
-    else:
-        games_scene.select_next()
-    countdown_value = 16
-    countdown_expired = False
-
-def on_y():
-    global countdown_value, countdown_expired, canvas, exited
-    if main_scene:
-        actions[selected_index]()
-    else:
-        selected_game = games_scene.get_selected_game()
-        if selected_game:
-            print(f"game/{selected_game}")
-            canvas.clear()
-            canvas.draw()
-            time.sleep(0.15)
-            exited = True
-    countdown_value = 16
-    countdown_expired = False
-
-def on_left():
-    if not main_scene:
-        games_scene.previous_page()
-
-def on_right():
-    if not main_scene:
-        games_scene.next_page()
-
-def on_a():
-    if not main_scene:
-        main_action()
-
-def on_bumpers():
-    global paused
-    paused = not paused
-
-# Main loop
-fps = 30
-frame_time = 1 / fps
-last_frame_time = time.time()
-
-# Add controller funcions
-controller.add_function("UP",on_up)
-controller.add_function("DOWN",on_down)
-controller.add_function("LEFT",on_left)
-controller.add_function("RIGHT",on_right)
-controller.add_function("Y",on_y)
-controller.add_function("A",on_a)
-controller.add_function("SELECT",shutdown)
-controller.add_function("RB",on_bumpers)
-controller.add_function("LB",on_bumpers)
-
-controller.add_function("UP2",on_up)
-controller.add_function("DOWN2",on_down)
-controller.add_function("LEFT2",on_left)
-controller.add_function("RIGHT2",on_right)
-controller.add_function("Y2",on_y)
-controller.add_function("A2",on_a)
-controller.add_function("SELECT2",shutdown)
-controller.add_function("RB2",on_bumpers)
-controller.add_function("LB2",on_bumpers)
+WHITE = (255, 255, 255)
+BLUE = (50, 100, 255)
 
 
-while True:
-    
-    # Clear the canvas and redraw
-    canvas.clear()
-    # time.sleep(0.15)
+class MainMenu(LEDWall.LEDProgram):
+    def __init__(self, canvas, controller):
+        # pointer to subclass to be executed on loop halt
+        self.queued = None
 
-    # check if exited
-    if exited: sys.exit(0)
+        # options to select / current selection
+        self.selection = 0
+        self.options = []
 
-    # if I'm paused, show a black screen
-    if paused:
-        canvas.draw()
-        time.sleep(0.15)
-        continue
+        # set the path to start the menu at and get the options within
+        self.base_path = path.dirname(path.abspath(__file__))
+        chdir(self.base_path)
+        self.getOptions()
 
-    # draw different items based on where I am
-    if main_scene:
+        # begin the code
+        super().__init__(canvas, controller)
 
-        selected_option = options[selected_index]
-        
-        # Calculate desired selector position for the main menu based on selected_index
-        selector_x = 132  # Adjust X position as needed for the main menu
-        selector_y = 46 + selected_index * 27  # Update Y based on selected_index
-        
-        # Get current selector position and calculate translation
-        current_center = selector.get_center()
-        dx = selector_x - current_center[0]
-        dy = selector_y - current_center[1]
-        
-        # Move selector to new position
-        selector.translate(dx, dy)
+    def __loop__(self):
+        super().__loop__()
+        if self.queued != None:
+            self.queued(self.canvas, self.controller)
 
-        # Update scrolling creator names
-        creatornames.translate(-2, 0)
-        if creatornames.get_width() + creatornames.position[0] < 0:
-            creatornames.set_position([128, 100])
+    def __draw__(self):
+        titleColor = (50, 255, 50)
 
-        # Countdown Timer Logic
-        if countdown_value > 0:
-            countdown_value -= 2 / fps
+        title = shapes.Phrase("MENU", (self.canvas.width / 2, 5), titleColor, size=1.5)
+        title.translate(0 - title.get_width() / 2, 0)
+        self.canvas.add(title)
+
+        for index, item in enumerate(self.options):
+            itemColor = WHITE if self.selection != index else BLUE
+            option = shapes.Phrase(
+                item,
+                (self.canvas.width / 2, self.canvas.height / 4 + index * 12),
+                itemColor,
+            )
+            option.translate(0 - option.get_width() / 2, 0)
+            self.canvas.add(option)
+
+    def __bind_controls__(self):
+        self.controller.add_function("UP", self.selection_up)
+        self.controller.add_function("DOWN", self.selection_down)
+        self.controller.add_function("A", self.enter)
+        self.controller.add_function("Y", self.enter)
+        self.controller.add_function("START", self.enter)
+        self.controller.add_function("SELECT", self.exit)
+
+    def selection_up(self):
+        self.selection = (self.selection - 1) % len(self.options)
+
+    def selection_down(self):
+        self.selection = (self.selection + 1) % len(self.options)
+
+    def enter(self):
+        if self.options[self.selection] == "Exit":
+            self.exit()
+
+        elif self.options[self.selection] == "Back":
+            chdir("..")
+            self.options = []
+            self.getOptions()
+
         else:
-            if not countdown_expired:
-                demo_action()
-                countdown_expired = True
+            chdir(self.options[self.selection])
+            self.checkExecutable()
+            self.options = []
+            self.getOptions()
 
-        # Update countdown display text and position
-        countdown_display.set_text(str(int(countdown_value)))
-        if countdown_value < 10:
-            countdown_display.set_position((114, 119))
-        else:
-            countdown_display.set_position((110, 119))
+    def checkExecutable(self):
+        try:
+            with scandir() as directory:
+                for handle in directory:
+                    moduleName = f"{path.basename(getcwd())}"
+                    if (
+                        not handle.name.startswith(".")
+                        and handle.is_file()
+                        and handle.name == moduleName + ".py"
+                    ):
+                        # dynamically import the module safely based on the absolute path
+                        moduleSpec = spec_from_file_location(
+                            moduleName, f"{getcwd()}/{moduleName}.py"
+                        )
+                        module = module_from_spec(moduleSpec)
+                        moduleSpec.loader.exec_module(module)
 
-        # Draw everything (check again for exited)
-        if not exited:
-            canvas.add(square)
-            canvas.add(headerline)
-            canvas.add(menuheader)
-            canvas.add(demoheader)
-            canvas.add(gamesheader)
-            canvas.add(creatornames)
-            canvas.add(countdown_display)
-            canvas.add(selector)
-    
-    else:
+                        # queue for execution and stop the loop
+                        # specifically, load class from module and set it to queue pointer
+                        self.queued = getattr(module, moduleName)
+                        self.running = False
 
-        game_names = games_scene.get_current_page()
-        for i, game in enumerate(game_names):
-            game_phrase = matrix.Phrase(game, (9, 7 + i * 15), (255, 255, 255), size=1)
-            if not exited: canvas.add(game_phrase)
-        
-        selected_game = games_scene.get_selected_game()
-        if selected_game:
-            # Calculate desired selector position for games menu
-            selector_x = -6
-            selector_y = 10 + games_scene.selected_index * 15
-            
-            # Get current selector position and calculate translation
-            current_center = selector.get_center()
-            dx = selector_x - current_center[0]
-            dy = selector_y - current_center[1]
-            
-            # Move selector to new position
-            selector.translate(dx, dy)
-            if not exited: canvas.add(selector)
+        except Exception as e:
+            print(
+                "Something went wrong trying to look for or execute that program. Error:\n",
+                e,
+            )
+            # traverse back one
+            chdir("..")
+            self.options = []
+            self.getOptions()
 
-    # last check to see if I'm exited -- if so, clear the canvas
-    if exited: canvas.clear()    
+    def getOptions(self):
+        try:
+            with scandir() as directory:
+                for handle in directory:
+                    if (
+                        not handle.name.startswith(".")
+                        and not handle.name.startswith("__")
+                        and handle.is_dir()
+                    ):
+                        self.options.append(handle.name)
 
-    # draw the canvas
-    canvas.draw()
+        except Exception as e:
+            raise Exception(
+                "Something went wrong trying to look for options in the current directory"
+            ) from e
+
+        self.options.sort()
+        if self.isBasePath() == False:
+            self.options.append("Back")
+        self.options.append("Exit")
+
+    def isBasePath(self):
+        return path.abspath(getcwd()) == path.abspath(self.base_path)
+
+
+if __name__ == "__main__":
+    MainMenu(Canvas(), Controller())
