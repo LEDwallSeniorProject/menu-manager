@@ -95,7 +95,10 @@ class Frogger(LEDWall.LEDProgram):
         self.controller.add_function("DOWN", self.controller_down)
         self.controller.add_function("LEFT", self.controller_left)
         self.controller.add_function("RIGHT", self.controller_right)
-        self.controller.add_function("START", self.game_over)
+        self.controller.add_function("START", self.stop)
+
+    def stop(self):
+        self.running = False
 
     #### Controller functions
     def controller_up(self):
@@ -155,11 +158,12 @@ class Frogger(LEDWall.LEDProgram):
             self.last_action_time = current_time
 
     def game_over(self):
+        if self.running == True:
+            raise ValueError("what")
         self.canvas.clear()
         self.canvas.add(shapes.Phrase("GAME OVER", [32, 64], size=1))
         self.canvas.draw()
         time.sleep(5)
-        self.running = False
 
     def move_obstacle(self, entity, direction, pixels):
         """Takes in an entity and moves it."""
@@ -260,6 +264,8 @@ class Frogger(LEDWall.LEDProgram):
 
         # Reduce lives (assuming lives is an instance attribute)
         self.lives -= 1
+        if self.lives <= 0:
+            self.stop()
 
     def frog_is_inbounds(self, x, y, direction):
         """Checks whether or not the entity is in bounds."""

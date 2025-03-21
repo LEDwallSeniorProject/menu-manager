@@ -27,6 +27,8 @@ class MainMenu(LEDWall.LEDProgram):
         super().__loop__()
         if self.queued != None:
             self.queued(self.canvas, self.controller)
+        
+        self.__init__(self.canvas, self.controller)
 
     def __draw__(self):
         titleColor = (50, 255, 50)
