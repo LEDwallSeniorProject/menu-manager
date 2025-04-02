@@ -12,10 +12,9 @@ class Snake(LEDWall.LEDProgram):
 
         self.food_spawned = True
         self.food_pos = [16, 8]
-        self.__fps__ = 10
 
         # begin the code (this triggers execution of the loop)
-        super().__init__(canvas, controller)
+        super().__init__(canvas, controller, fps=10)
 
     # REQUIRED FUNCTION
     # this function will run every frame
