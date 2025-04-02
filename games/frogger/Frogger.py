@@ -44,6 +44,8 @@ class Frogger(LEDWall.LEDProgram):
 
         # Keep track of time of last action
         self.last_action_time = time.time()
+        self.__bind_controls__()
+        
         # begin the code (this triggers execution of the loop)
         super().__init__(canvas, controller)
 
@@ -159,7 +161,7 @@ class Frogger(LEDWall.LEDProgram):
 
     def game_over(self):
         if self.running == True:
-            raise ValueError("what")
+            raise ValueError("self.running == True but game has ended")
         self.canvas.clear()
         self.canvas.add(shapes.Phrase("GAME OVER", [32, 64], size=1))
         self.canvas.draw()

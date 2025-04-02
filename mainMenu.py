@@ -23,12 +23,12 @@ class MainMenu(LEDWall.LEDProgram):
         # begin the code
         super().__init__(canvas, controller)
 
-    def __loop__(self):
-        super().__loop__()
+    def postLoop(self):
         if self.queued != None:
             self.queued(self.canvas, self.controller)
         
-        self.__init__(self.canvas, self.controller)
+        if not self.exited:
+            self.__init__(self.canvas, self.controller)
 
     def __draw__(self):
         titleColor = (50, 255, 50)
@@ -53,7 +53,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("A", self.enter)
         self.controller.add_function("Y", self.enter)
         self.controller.add_function("START", self.enter)
-        self.controller.add_function("SELECT", self.exit)
+        self.controller.add_function("SELECT", self.stop)
 
     def selection_up(self):
         self.selection = (self.selection - 1) % len(self.options)
@@ -63,7 +63,7 @@ class MainMenu(LEDWall.LEDProgram):
 
     def enter(self):
         if self.options[self.selection] == "Exit":
-            self.exit()
+            self.stop()
 
         elif self.options[self.selection] == "Back":
             chdir("..")
