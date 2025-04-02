@@ -25,9 +25,12 @@ class MainMenu(LEDWall.LEDProgram):
 
     def postLoop(self):
         if self.queued != None:
-            self.queued(self.canvas, self.controller)
+            try:
+                self.queued(self.canvas, self.controller)
+            except Exception as e:
+                raise RuntimeError("Error occured running the selected program, within the selected program. ") from e
         
-        if not self.exited:
+        if not self.__exited__:
             self.__init__(self.canvas, self.controller)
 
     def __draw__(self):

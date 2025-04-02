@@ -44,8 +44,7 @@ class Frogger(LEDWall.LEDProgram):
 
         # Keep track of time of last action
         self.last_action_time = time.time()
-        self.__bind_controls__()
-        
+                
         # begin the code (this triggers execution of the loop)
         super().__init__(canvas, controller)
 
