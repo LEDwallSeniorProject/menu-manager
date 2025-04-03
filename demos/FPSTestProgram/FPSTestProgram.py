@@ -52,7 +52,7 @@ class FPSTestProgram(LEDWall.LEDProgram):
 
     def __draw__(self):
         if self.frame >= self.max_frames:
-            self.stop()
+            self.quit()
             return
 
         frame_start = time.perf_counter()
@@ -86,7 +86,7 @@ class FPSTestProgram(LEDWall.LEDProgram):
         self.frame += 1
 
     def __bind_controls__(self):
-        self.controller.add_function("SELECT", self.stop)
+        self.controller.add_function("SELECT", self.quit)
 
     def postLoop(self):
         self.canvas.clear()

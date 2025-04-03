@@ -22,7 +22,7 @@ class ClockProgram(LEDWall.LEDProgram):
 
     def __draw__(self):
         if self.timer >= self.max_time:
-            self.stop()
+            self.quit()
             return
 
         now = datetime.now()
@@ -59,7 +59,7 @@ class ClockProgram(LEDWall.LEDProgram):
         time.sleep(1)  # saniyede bir güncellenen saat
 
     def __bind_controls__(self):
-        self.controller.add_function("START", self.stop)
+        self.controller.add_function("SELECT", self.quit)
 
     def postLoop(self):
         self.canvas.clear()

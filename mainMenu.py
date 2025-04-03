@@ -56,7 +56,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("A", self.enter)
         self.controller.add_function("Y", self.enter)
         self.controller.add_function("START", self.enter)
-        self.controller.add_function("SELECT", self.stop)
+        self.controller.add_function("SELECT", self.__stop__)
 
     def selection_up(self):
         self.selection = (self.selection - 1) % len(self.options)
@@ -66,7 +66,7 @@ class MainMenu(LEDWall.LEDProgram):
 
     def enter(self):
         if self.options[self.selection] == "Exit":
-            self.stop()
+            self.__stop__()
 
         elif self.options[self.selection] == "Back":
             chdir("..")

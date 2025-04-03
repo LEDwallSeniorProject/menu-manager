@@ -72,6 +72,7 @@ class Snake(LEDWall.LEDProgram):
         self.controller.add_function("DOWN", self.down)
         self.controller.add_function("LEFT", self.left)
         self.controller.add_function("RIGHT", self.right)
+        self.controller.add_function("SELECT", self.quit)
 
 
     # Setup the controller functions

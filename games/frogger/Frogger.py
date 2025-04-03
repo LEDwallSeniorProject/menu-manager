@@ -96,10 +96,7 @@ class Frogger(LEDWall.LEDProgram):
         self.controller.add_function("DOWN", self.controller_down)
         self.controller.add_function("LEFT", self.controller_left)
         self.controller.add_function("RIGHT", self.controller_right)
-        self.controller.add_function("SELECT", self.stop)
-
-    def stop(self):
-        self.running = False
+        self.controller.add_function("SELECT", self.quit)
 
     #### Controller functions
     def controller_up(self):

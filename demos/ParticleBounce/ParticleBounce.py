@@ -66,7 +66,7 @@ class ParticleBounce(LEDWall.LEDProgram):
 
     def __draw__(self):
         if self.counter >= self.max_frames:
-            self.stop()
+            self.quit()
             return
 
         self.canvas.clear()
@@ -92,7 +92,7 @@ class ParticleBounce(LEDWall.LEDProgram):
         self.counter += 1
 
     def __bind_controls__(self):
-        self.controller.add_function("START", self.stop)
+        self.controller.add_function("SELECT", self.quit)
 
     def postLoop(self):
         self.canvas.clear()
