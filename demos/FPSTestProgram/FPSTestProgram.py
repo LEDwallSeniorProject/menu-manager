@@ -4,18 +4,6 @@ import time
 
 class FPSTestProgram(LEDWall.LEDProgram):
     def __init__(self, canvas, controller):
-        self.frame = 0
-        self.max_frames = 200
-
-        self.clear_times = []
-        self.rotate_times = []
-        self.add_times = []
-        self.add_all_times = []
-        self.draw_times = []
-        self.frame_times = []
-
-        self.fps_text = shapes.Phrase("FPS: ...", [0, 0])
-
         self.polygons = [
             shapes.Polygon(shapes.get_polygon_vertices(3, 20, (32, 32)), (255, 0, 0)),
             shapes.Polygon(shapes.get_polygon_vertices(4, 20, (96, 32)), (0, 255, 0)),
@@ -39,51 +27,34 @@ class FPSTestProgram(LEDWall.LEDProgram):
             while elapsed_time < frame_time:
                 current_time = time.time()
                 elapsed_time = current_time - last_time
-                time.sleep(.001)
+                time.sleep(.0001)
 
-            last_time = current_time
+
+            self.__draw__(frames, last_time)
             frames += 1
+            last_time = current_time
 
-            self.__draw__()
             
 
         self.postLoop()
         self.__unbind_controls__()
 
-    def __draw__(self):
-        if self.frame >= self.max_frames:
-            self.quit()
-            return
-
-        frame_start = time.perf_counter()
+    def __draw__(self, frames, last_time):
+      
         self.canvas.clear()
-        clear_end = time.perf_counter()
-        self.clear_times.append(clear_end - frame_start)
 
-        add_all_start = time.perf_counter()
         for polygon in self.polygons:
-            rotate_start = time.perf_counter()
             polygon.rotate(1, polygon.center)
-            self.rotate_times.append(time.perf_counter() - rotate_start)
 
-            add_start = time.perf_counter()
             self.canvas.add(polygon)
-            self.add_times.append(time.perf_counter() - add_start)
 
-        if self.frame > 0:
-            avg_frame_time = sum(self.frame_times) / len(self.frame_times)
-            fps = 1 / avg_frame_time
-            self.fps_text.set_text(f"FPS: {fps:.2f}")
+        frame_time = time.time()-last_time
+        avg_fps = 1/frame_time
 
-        self.canvas.add(self.fps_text)
-        self.add_all_times.append(time.perf_counter() - add_all_start)
+        fps_phrase = shapes.Phrase(f"FPS: {avg_fps:.1f}", [0,0])
+        self.canvas.add(fps_phrase)
 
-        draw_start = time.perf_counter()
         self.canvas.draw()
-        self.draw_times.append(time.perf_counter() - draw_start)
-
-        self.frame_times.append(time.perf_counter() - frame_start)
-        self.frame += 1
 
     def __bind_controls__(self):
         self.controller.add_function("SELECT", self.quit)

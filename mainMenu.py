@@ -137,4 +137,4 @@ class MainMenu(LEDWall.LEDProgram):
 
 
 if __name__ == "__main__":
-    MainMenu(Canvas(), Controller())
+    MainMenu(Canvas(limitFps=False), Controller())
