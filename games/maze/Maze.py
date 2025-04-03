@@ -1,4 +1,4 @@
-from matrix_library import LEDWall, canvas as c, shapes as s
+from matrix_library import LEDWall, canvas as c, shapes as s, Controller
 from random import randint
 import time, sys
 
@@ -58,11 +58,10 @@ class Maze(LEDWall.LEDProgram):
         #draws the initial position of the character
 
     def postLoop(self):
-        # print game over!
         self.canvas.clear()
         self.canvas.add(s.Phrase("GAME OVER", [32, 64], size=1))
         self.canvas.draw()
-        time.sleep(2)
+        time.sleep(1)
 
     def __loop__(self):
         self.preLoop()
@@ -75,13 +74,15 @@ class Maze(LEDWall.LEDProgram):
             current_time = time.time()
             elapsed_time = current_time - last_time
 
-            if elapsed_time > frame_time:
-                last_time = current_time
-                frames += 1
-
-                self.canvas.draw()
-            else:
+            while elapsed_time < frame_time:
+                current_time = time.time()
+                elapsed_time = current_time - last_time
                 time.sleep(.001)
+
+            last_time = current_time
+            frames += 1
+
+            self.canvas.draw()
 
         self.postLoop()
         self.__unbind_controls__()
@@ -125,7 +126,7 @@ class Maze(LEDWall.LEDProgram):
         self.controller.add_function("LEFT",self.move_left)
         self.controller.add_function("DOWN",self.move_down)
         self.controller.add_function("RIGHT",self.move_right)
-        self.controller.add_function("START",self.quit)
+        self.controller.add_function("SELECT",self.quit)
     
           
     def gen_maze(self):
@@ -527,4 +528,4 @@ class Maze(LEDWall.LEDProgram):
 
 
 if __name__ == "__main__":
-    Maze(Canvas(), Controller())
+    Maze(c.Canvas(), Controller())
