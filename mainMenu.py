@@ -21,7 +21,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.getOptions()
 
         # begin the code
-        super().__init__(canvas, controller)
+        super().__init__(canvas, controller, fps=15)
 
     def postLoop(self):
         if self.queued != None:
