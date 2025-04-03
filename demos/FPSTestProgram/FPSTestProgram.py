@@ -17,26 +17,40 @@ class FPSTestProgram(LEDWall.LEDProgram):
     def __loop__(self):
         self.preLoop()
         last_time = time.time()
-        frame_time = 1 / 60
+        expected_frame_time = 1 / 60
         frames = 0
+        fps_timer = 0  # Track time elapsed for FPS averaging
+        fps_count = 0  # Track number of frames in the interval
+        avg_fps = 0    # Store averaged FPS
 
         while self.running:
             current_time = time.time()
-            elapsed_time = current_time - last_time
+            frame_time = current_time - last_time
+            elapsed_time = frame_time
+            last_time = current_time
 
-            while elapsed_time < frame_time:
+            # Accumulate FPS stats
+            fps_timer += frame_time
+            fps_count += 1
+
+            # Update FPS every second
+            if fps_timer >= 1:
+                avg_fps = fps_count / fps_timer  # Average FPS over the past second
+                fps_timer = 0
+                fps_count = 0
+
+            while elapsed_time < expected_frame_time:
                 current_time = time.time()
                 elapsed_time = current_time - last_time
                 time.sleep(.001)
 
-            self.__draw__(frames, last_time)
+            self.__draw__(avg_fps)
             frames += 1
-            last_time = current_time
 
         self.postLoop()
         self.__unbind_controls__()
 
-    def __draw__(self, frames, last_time):
+    def __draw__(self, avg_fps):
       
         self.canvas.clear()
 
@@ -44,9 +58,6 @@ class FPSTestProgram(LEDWall.LEDProgram):
             polygon.rotate(1, polygon.center)
 
             self.canvas.add(polygon)
-
-        frame_time = time.time()-last_time
-        avg_fps = 1/frame_time
 
         fps_phrase = shapes.Phrase(f"FPS: {avg_fps:.1f}", [0,0])
         self.canvas.add(fps_phrase)
@@ -60,19 +71,6 @@ class FPSTestProgram(LEDWall.LEDProgram):
         self.canvas.clear()
         self.canvas.draw()
         time.sleep(0.5)
-
-        # 🟡 Performans çıktıları yorum satırına alındı (gerekirse açabilirsin)
-        # if self.frame_times:
-        #     avg_fps = 1 / (sum(self.frame_times) / len(self.frame_times))
-        #     print(f"Avg FPS: {avg_fps:.2f}")
-        #     print(f"Frame Count: {self.frame}")
-        #     print(f"Clear avg: {sum(self.clear_times)/len(self.clear_times):.6f}s")
-        #     print(f"Rotate avg: {sum(self.rotate_times)/len(self.rotate_times):.6f}s")
-        #     print(f"Add avg: {sum(self.add_times)/len(self.add_times):.6f}s")
-        #     print(f"Add All avg: {sum(self.add_all_times)/len(self.add_all_times):.6f}s")
-        #     print(f"Draw avg: {sum(self.draw_times)/len(self.draw_times):.6f}s")
-        #     print(f"Frame avg: {sum(self.frame_times)/len(self.frame_times):.6f}s")
-
 
 if __name__ == "__main__":
     FPSTestProgram(Canvas(), Controller())
