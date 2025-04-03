@@ -57,6 +57,12 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("Y", self.enter)
         self.controller.add_function("START", self.enter)
         self.controller.add_function("SELECT", self.__stop__)
+        self.controller.add_function("UP2", self.selection_up)
+        self.controller.add_function("DOWN2", self.selection_down)
+        self.controller.add_function("A2", self.enter)
+        self.controller.add_function("Y2", self.enter)
+        self.controller.add_function("START2", self.enter)
+        self.controller.add_function("SELECT2", self.__stop__)
 
     def selection_up(self):
         self.selection = (self.selection - 1) % len(self.options)

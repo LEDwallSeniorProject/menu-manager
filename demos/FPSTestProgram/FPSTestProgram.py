@@ -27,14 +27,11 @@ class FPSTestProgram(LEDWall.LEDProgram):
             while elapsed_time < frame_time:
                 current_time = time.time()
                 elapsed_time = current_time - last_time
-                time.sleep(.0001)
-
+                time.sleep(.001)
 
             self.__draw__(frames, last_time)
             frames += 1
             last_time = current_time
-
-            
 
         self.postLoop()
         self.__unbind_controls__()
