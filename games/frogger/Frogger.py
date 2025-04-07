@@ -263,7 +263,7 @@ class Frogger(LEDWall.LEDProgram):
         # Reduce lives (assuming lives is an instance attribute)
         self.lives -= 1
         if self.lives <= 0:
-            self.stop()
+            self.quit()
 
     def frog_is_inbounds(self, x, y, direction):
         """Checks whether or not the entity is in bounds."""

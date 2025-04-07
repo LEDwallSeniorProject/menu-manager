@@ -16,37 +16,43 @@ class FPSTestProgram(LEDWall.LEDProgram):
 
     def __loop__(self):
         self.preLoop()
-        last_time = time.time()
-        expected_frame_time = 1 / 60
-        frames = 0
-        fps_timer = 0  # Track time elapsed for FPS averaging
-        fps_count = 0  # Track number of frames in the interval
-        avg_fps = 0    # Store averaged FPS
+        last = time.time()
+        max_fps = 60
+        max_frame_time = 1 / max_fps
+        expected_frame_time = max_frame_time
+        start = last
+        fps_count = 0
+        fps_time = 0
+        avg_fps = 0
 
         while self.running:
-            current_time = time.time()
-            frame_time = current_time - last_time
-            elapsed_time = frame_time
-            last_time = current_time
+            start_time = time.time()
+            
+            self.__draw__(avg_fps)
+            
+            elapsed = time.time() - start_time
+            sleep_time = expected_frame_time - elapsed
 
-            # Accumulate FPS stats
-            fps_timer += frame_time
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+            
+            now = time.time()
+            dif = now - last
+            last = now
+
+            fps_time += dif
             fps_count += 1
 
-            # Update FPS every second
-            if fps_timer >= 1:
-                avg_fps = fps_count / fps_timer  # Average FPS over the past second
-                fps_timer = 0
+            if fps_time >= 1:
+                avg_fps = fps_count
                 fps_count = 0
+                fps_time = 0
 
-            while elapsed_time < expected_frame_time:
-                current_time = time.time()
-                elapsed_time = current_time - last_time
-                time.sleep(.001)
-
-            self.__draw__(avg_fps)
-            frames += 1
-
+                if avg_fps > max_fps:
+                    expected_frame_time += max_frame_time * 0.05
+                elif (max_fps - avg_fps) > 3:
+                    expected_frame_time -= max_frame_time * 0.01
+                
         self.postLoop()
         self.__unbind_controls__()
 
@@ -59,7 +65,7 @@ class FPSTestProgram(LEDWall.LEDProgram):
 
             self.canvas.add(polygon)
 
-        fps_phrase = shapes.Phrase(f"FPS: {avg_fps:.1f}", [0,0])
+        fps_phrase = shapes.Phrase(f"FPS: {avg_fps:.0f}", [0,0])
         self.canvas.add(fps_phrase)
 
         self.canvas.draw()

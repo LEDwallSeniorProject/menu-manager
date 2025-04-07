@@ -1,6 +1,7 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
 from os import scandir, chdir, getcwd, path
 from importlib.util import spec_from_file_location, module_from_spec
+import time
 
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
@@ -21,7 +22,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.getOptions()
 
         # begin the code
-        super().__init__(canvas, controller, fps=15)
+        super().__init__(canvas, controller, fps=15, trackFPS=True)
 
     def postLoop(self):
         if self.queued != None:
@@ -143,4 +144,11 @@ class MainMenu(LEDWall.LEDProgram):
 
 
 if __name__ == "__main__":
-    MainMenu(Canvas(limitFps=False), Controller())
+    canvas = Canvas(limitFps=False)
+    # picture = shapes.Image(128,128)
+    # picture.loadfile('startup.png')
+    # canvas.add(picture)
+    # canvas.draw()
+    controller = Controller()
+    #time.sleep(5)
+    MainMenu(canvas, controller)
