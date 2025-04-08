@@ -46,7 +46,7 @@ class Frogger(LEDWall.LEDProgram):
         self.last_action_time = time.time()
                 
         # begin the code (this triggers execution of the loop)
-        super().__init__(canvas, controller)
+        super().__init__(canvas, controller, trackFPS=True)
 
     # REQUIRED FUNCTION
     # this function will run every frame

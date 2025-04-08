@@ -22,7 +22,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.getOptions()
 
         # begin the code
-        super().__init__(canvas, controller, fps=15, trackFPS=True)
+        super().__init__(canvas, controller, trackFPS=True)
 
     def postLoop(self):
         if self.queued != None:
@@ -91,6 +91,7 @@ class MainMenu(LEDWall.LEDProgram):
             with scandir() as directory:
                 for handle in directory:
                     moduleName = f"{path.basename(getcwd())}"
+                    moduleName = moduleName[0].upper() + moduleName[1:]
                     if (
                         not handle.name.startswith(".")
                         and handle.is_file()
