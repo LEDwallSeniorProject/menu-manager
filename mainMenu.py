@@ -142,13 +142,15 @@ class MainMenu(LEDWall.LEDProgram):
     def isBasePath(self):
         return path.abspath(getcwd()) == path.abspath(self.base_path)
 
-
 if __name__ == "__main__":
     canvas = Canvas(limitFps=False)
-    # picture = shapes.Image(128,128)
-    # picture.loadfile('startup.png')
-    # canvas.add(picture)
-    # canvas.draw()
+
+    if canvas.render == "zmq":
+        img = shapes.Image(width=128, height=128, position=[0,0])
+        img.loadfile(filename="startup.png")
+        canvas.add(img)
+        canvas.draw()
+        time.sleep(1)
+    
     controller = Controller()
-    #time.sleep(5)
-    MainMenu(canvas, controller)
+    MainMenu(canvas,controller)
