@@ -36,7 +36,7 @@ class Frogger(LEDWall.LEDProgram):
         self.car_speed = 2
         self.log_speed = 1.5
 
-        self.cooldown_time = 0.2
+        self.cooldown_time = 0.1
 
         self.reseting = False
         self.lives = 3
@@ -46,7 +46,7 @@ class Frogger(LEDWall.LEDProgram):
         self.last_action_time = time.time()
                 
         # begin the code (this triggers execution of the loop)
-        super().__init__(canvas, controller, trackFPS=True)
+        super().__init__(canvas, controller, trackFPS=False)
 
     # REQUIRED FUNCTION
     # this function will run every frame
@@ -88,10 +88,14 @@ class Frogger(LEDWall.LEDProgram):
         self.obstacle_inbounds()
         self.define_drawings()
 
+    def toggle_track_fps(self):
+        self.trackFPS = not self.trackFPS
+
     # REQUIRED FUNCTION
     # this function will run once at super().__init__()
     # and should contain mappings to control the program
     def __bind_controls__(self):
+        self.controller.add_function("LB", self.toggle_track_fps)
         self.controller.add_function("UP", self.controller_up)
         self.controller.add_function("DOWN", self.controller_down)
         self.controller.add_function("LEFT", self.controller_left)

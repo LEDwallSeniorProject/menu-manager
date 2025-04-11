@@ -5,7 +5,7 @@ import time
 
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
-
+TITLECOLOR = (50, 255, 50)
 
 class MainMenu(LEDWall.LEDProgram):
     def __init__(self, canvas, controller):
@@ -15,14 +15,17 @@ class MainMenu(LEDWall.LEDProgram):
         # options to select / current selection
         self.selection = 0
         self.options = []
+        
+        # begin the code
+        super().__init__(canvas, controller, trackFPS=False, fps=15)
+
+    def preLoop(self):
+        self.autoRunTime = time.time()
 
         # set the path to start the menu at and get the options within
         self.base_path = path.dirname(path.abspath(__file__))
         chdir(self.base_path)
         self.getOptions()
-
-        # begin the code
-        super().__init__(canvas, controller, trackFPS=True)
 
     def postLoop(self):
         if self.queued != None:
@@ -30,14 +33,13 @@ class MainMenu(LEDWall.LEDProgram):
                 self.queued(self.canvas, self.controller)
             except Exception as e:
                 raise RuntimeError("Error occured running the selected program, within the selected program. ") from e
-        
+
         if not self.__exited__:
             self.__init__(self.canvas, self.controller)
 
     def __draw__(self):
-        titleColor = (50, 255, 50)
 
-        title = shapes.Phrase("MENU", (self.canvas.width / 2, 5), titleColor, size=1.5)
+        title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
         title.translate(0 - title.get_width() / 2, 0)
         self.canvas.add(title)
 
@@ -45,13 +47,17 @@ class MainMenu(LEDWall.LEDProgram):
             itemColor = WHITE if self.selection != index else BLUE
             option = shapes.Phrase(
                 item,
-                (self.canvas.width / 2, self.canvas.height / 4 + index * 12),
+                (64, 32 + index * 12),
                 itemColor,
             )
             option.translate(0 - option.get_width() / 2, 0)
             self.canvas.add(option)
 
+        if (time.time() - self.autoRunTime) > 12:
+            self.autoRunner()
+
     def __bind_controls__(self):
+        self.controller.add_function("LB", self.toggle_track_fps)
         self.controller.add_function("UP", self.selection_up)
         self.controller.add_function("DOWN", self.selection_down)
         self.controller.add_function("A", self.enter)
@@ -65,11 +71,16 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("START2", self.enter)
         self.controller.add_function("SELECT2", self.__stop__)
 
+    def toggle_track_fps(self):
+        self.trackFPS = not self.trackFPS
+
     def selection_up(self):
         self.selection = (self.selection - 1) % len(self.options)
+        self.autoRunTime = time.time()
 
     def selection_down(self):
         self.selection = (self.selection + 1) % len(self.options)
+        self.autoRunTime = time.time()
 
     def enter(self):
         if self.options[self.selection] == "Exit":
@@ -85,6 +96,8 @@ class MainMenu(LEDWall.LEDProgram):
             self.checkExecutable()
             self.options = []
             self.getOptions()
+        
+        self.autoRunTime = time.time()
 
     def checkExecutable(self):
         try:
