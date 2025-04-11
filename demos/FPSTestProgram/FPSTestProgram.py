@@ -12,63 +12,14 @@ class FPSTestProgram(LEDWall.LEDProgram):
             shapes.Polygon(shapes.get_polygon_vertices(7, 20, (96, 96)), (0, 255, 255)),
         ]
 
-        super().__init__(canvas, controller)
+        super().__init__(canvas, controller, trackFPS=True, fps=60)
 
-    def __loop__(self):
-        self.preLoop()
-        last = time.time()
-        max_fps = 60
-        max_frame_time = 1 / max_fps
-        expected_frame_time = max_frame_time
-        start = last
-        fps_count = 0
-        fps_time = 0
-        avg_fps = 0
-
-        while self.running:
-            start_time = time.time()
-            
-            self.__draw__(avg_fps)
-            
-            elapsed = time.time() - start_time
-            sleep_time = expected_frame_time - elapsed
-
-            if sleep_time > 0:
-                time.sleep(sleep_time)
-            
-            now = time.time()
-            dif = now - last
-            last = now
-
-            fps_time += dif
-            fps_count += 1
-
-            if fps_time >= 1:
-                avg_fps = fps_count
-                fps_count = 0
-                fps_time = 0
-
-                if avg_fps > max_fps:
-                    expected_frame_time += max_frame_time * 0.05
-                elif (max_fps - avg_fps) > 3:
-                    expected_frame_time -= max_frame_time * 0.01
-                
-        self.postLoop()
-        self.__unbind_controls__()
-
-    def __draw__(self, avg_fps):
-      
-        self.canvas.clear()
-
+    def __draw__(self):   
         for polygon in self.polygons:
             polygon.rotate(1, polygon.center)
 
             self.canvas.add(polygon)
 
-        fps_phrase = shapes.Phrase(f"FPS: {avg_fps:.0f}", [0,0])
-        self.canvas.add(fps_phrase)
-
-        self.canvas.draw()
 
     def __bind_controls__(self):
         self.controller.add_function("SELECT", self.quit)
