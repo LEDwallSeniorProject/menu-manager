@@ -43,7 +43,7 @@ class MainMenu(LEDWall.LEDProgram):
                 self.canvas.draw()
                 time.sleep(2)
                 self.canvas.clear()
-                os.system("sudo shutdown -h now")
+                os.system("sudo shutdown now")
 
     def __draw__(self):
         title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
