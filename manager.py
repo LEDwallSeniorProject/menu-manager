@@ -37,13 +37,11 @@ class MainMenu(LEDWall.LEDProgram):
         if not self.__exited__:
             self.__init__(self.canvas, self.controller)
         else:
-            if canvas.render == "zmq":
-                self.canvas.clear()
-                self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
-                self.canvas.draw()
-                time.sleep(2)
-                self.canvas.clear()
-                os.system("sudo shutdown now")
+            self.canvas.clear()
+            self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
+            self.canvas.draw()
+            time.sleep(2)
+            self.canvas.clear()
 
     def __draw__(self):
         title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
