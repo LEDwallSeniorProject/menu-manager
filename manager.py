@@ -58,8 +58,8 @@ class MainMenu(LEDWall.LEDProgram):
             option.translate(0 - option.get_width() / 2, 0)
             self.canvas.add(option)
 
-        if (time.time() - self.autoRunTime) > 12:
-            self.autoRunner()
+        # if (time.time() - self.autoRunTime) > 12:
+        #     self.autoRunner()
 
     def __bind_controls__(self):
         self.controller.add_function("LB", self.toggle_track_fps)
