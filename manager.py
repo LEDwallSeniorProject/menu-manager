@@ -1,12 +1,14 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
 from os import scandir, chdir, getcwd, path
 from importlib.util import spec_from_file_location, module_from_spec
+import shutil
 import subprocess
 import time
 
 WHITE = (255, 255, 255)
 BLUE = (50, 100, 255)
 TITLECOLOR = (50, 255, 50)
+ERRORCOLOR = (255, 80, 80)
 
 class MainMenu(LEDWall.LEDProgram):
     def __init__(self, canvas, controller):
@@ -46,16 +48,14 @@ class MainMenu(LEDWall.LEDProgram):
 
         if not self.__exited__:
             self.__init__(self.canvas, self.controller)
+        elif self._shutdown_triggered:
+            return
         else:
-            if self._shutdown_triggered:
-                self._show_shutdown_message()
-                self._shutdown_system()
-            else:
-                self.canvas.clear()
-                self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
-                self.canvas.draw()
-                time.sleep(2)
-                self.canvas.clear()
+            self.canvas.clear()
+            self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
+            self.canvas.draw()
+            time.sleep(2)
+            self.canvas.clear()
 
     def __draw__(self):
         title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
@@ -213,29 +213,52 @@ class MainMenu(LEDWall.LEDProgram):
             return
 
         self._shutdown_triggered = True
-        self.__stop__()
+        self._show_shutdown_message()
+        if self._shutdown_system():
+            self.__stop__()
+        else:
+            self._shutdown_triggered = False
+            self._reset_stop_states()
 
     def _show_shutdown_message(self):
-        try:
-            self.canvas.clear()
-            message = shapes.Phrase("SHUTDOWN", (64, 40), TITLECOLOR, size=1.5)
-            message.translate(0 - message.get_width() / 2, 0)
-            self.canvas.add(message)
-            self.canvas.draw()
-            time.sleep(2)
-        finally:
-            self.canvas.clear()
-            self.canvas.draw()
+        self._show_centered_phrase("SHUTDOWN", TITLECOLOR, 2)
+
+    def _show_shutdown_error(self, detail):
+        print(f"Failed to initiate system shutdown: {detail}")
+        self._show_centered_phrase("SHUTDOWN FAILED", ERRORCOLOR, 2)
+
+    def _show_centered_phrase(self, text, color, seconds):
+        self.canvas.clear()
+        phrase = shapes.Phrase(text, (64, 40), color, size=1.5)
+        phrase.translate(0 - phrase.get_width() / 2, 0)
+        self.canvas.add(phrase)
+        self.canvas.draw()
+        time.sleep(seconds)
+        self.canvas.clear()
+        self.canvas.draw()
 
     def _shutdown_system(self):
+        sudo_path = shutil.which("sudo")
+        if sudo_path is None:
+            self._show_shutdown_error("sudo not found")
+            return False
+
         try:
-            subprocess.Popen(
-                ["sudo", "shutdown", "-h", "now"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+            result = subprocess.run(
+                [sudo_path, "-n", "shutdown", "-h", "now"],
+                capture_output=True,
+                text=True,
+                check=False,
             )
+            if result.returncode != 0:
+                detail = result.stderr.strip() or result.stdout.strip() or f"exit code {result.returncode}"
+                self._show_shutdown_error(detail)
+                return False
         except Exception as e:
-            print(f"Failed to initiate system shutdown: {e}")
+            self._show_shutdown_error(str(e))
+            return False
+
+        return True
 
 if __name__ == "__main__":
     canvas = Canvas(limitFps=False)
