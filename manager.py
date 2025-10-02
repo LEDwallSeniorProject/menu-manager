@@ -47,11 +47,15 @@ class MainMenu(LEDWall.LEDProgram):
         if not self.__exited__:
             self.__init__(self.canvas, self.controller)
         else:
-            self.canvas.clear()
-            self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
-            self.canvas.draw()
-            time.sleep(2)
-            self.canvas.clear()
+            if self._shutdown_triggered:
+                self._show_shutdown_message()
+                self._shutdown_system()
+            else:
+                self.canvas.clear()
+                self.canvas.add(shapes.Phrase("GOODBYE", (0, 5), TITLECOLOR, size=1.5))
+                self.canvas.draw()
+                time.sleep(2)
+                self.canvas.clear()
 
     def __draw__(self):
         title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
@@ -99,7 +103,8 @@ class MainMenu(LEDWall.LEDProgram):
 
     def enter(self):
         if self.options[self.selection] == "Exit":
-            self.__stop__()
+            self._trigger_shutdown()
+            return
 
         elif self.options[self.selection] == "Back":
             chdir("..")
@@ -166,7 +171,8 @@ class MainMenu(LEDWall.LEDProgram):
         self.options.sort()
         if self.isBasePath() == False:
             self.options.append("Back")
-        self.options.append("Exit")
+        else:
+            self.options.append("Exit")
 
     def isBasePath(self):
         return path.abspath(getcwd()) == path.abspath(self.base_path)
@@ -191,20 +197,35 @@ class MainMenu(LEDWall.LEDProgram):
         state["last"] = now
 
         if state["start"] is not None and (now - state["start"]) >= self._stop_hold_threshold:
-            if not self._shutdown_triggered:
-                self._shutdown_system()
-                self._shutdown_triggered = True
-            self.__stop__()
+            self._trigger_shutdown()
 
     def _reset_stop_states(self):
         for state in self._stop_states.values():
             state["start"] = None
             state["last"] = None
-        self._shutdown_triggered = False
 
     def __stop__(self):
         self._reset_stop_states()
         super().__stop__()
+
+    def _trigger_shutdown(self):
+        if self._shutdown_triggered:
+            return
+
+        self._shutdown_triggered = True
+        self.__stop__()
+
+    def _show_shutdown_message(self):
+        try:
+            self.canvas.clear()
+            message = shapes.Phrase("SHUTDOWN", (64, 40), TITLECOLOR, size=1.5)
+            message.translate(0 - message.get_width() / 2, 0)
+            self.canvas.add(message)
+            self.canvas.draw()
+            time.sleep(2)
+        finally:
+            self.canvas.clear()
+            self.canvas.draw()
 
     def _shutdown_system(self):
         try:
