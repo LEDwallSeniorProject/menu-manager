@@ -1,6 +1,7 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
 from os import scandir, chdir, getcwd, path
 from importlib.util import spec_from_file_location, module_from_spec
+import subprocess
 import time
 
 WHITE = (255, 255, 255)
@@ -15,6 +16,15 @@ class MainMenu(LEDWall.LEDProgram):
         # options to select / current selection
         self.selection = 0
         self.options = []
+
+        # track SELECT hold timing for safe shutdown
+        self._stop_hold_threshold = 3.0
+        self._stop_hold_reset_gap = 0.25
+        self._stop_states = {
+            "SELECT": {"start": None, "last": None},
+            "SELECT2": {"start": None, "last": None},
+        }
+        self._shutdown_triggered = False
         
         # begin the code
         super().__init__(canvas, controller, trackFPS=False, fps=15)
@@ -68,13 +78,13 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("A", self.enter)
         self.controller.add_function("Y", self.enter)
         self.controller.add_function("START", self.enter)
-        self.controller.add_function("SELECT", self.__stop__)
+        self.controller.add_function("SELECT", self._select_stop)
         self.controller.add_function("UP2", self.selection_up)
         self.controller.add_function("DOWN2", self.selection_down)
         self.controller.add_function("A2", self.enter)
         self.controller.add_function("Y2", self.enter)
         self.controller.add_function("START2", self.enter)
-        self.controller.add_function("SELECT2", self.__stop__)
+        self.controller.add_function("SELECT2", self._select2_stop)
 
     def toggle_track_fps(self):
         self.trackFPS = not self.trackFPS
@@ -160,6 +170,51 @@ class MainMenu(LEDWall.LEDProgram):
 
     def isBasePath(self):
         return path.abspath(getcwd()) == path.abspath(self.base_path)
+
+    def _select_stop(self):
+        self._handle_stop_hold("SELECT")
+
+    def _select2_stop(self):
+        self._handle_stop_hold("SELECT2")
+
+    def _handle_stop_hold(self, button):
+        now = time.time()
+        state = self._stop_states[button]
+
+        if (
+            state["start"] is None
+            or state["last"] is None
+            or (now - state["last"]) > self._stop_hold_reset_gap
+        ):
+            state["start"] = now
+
+        state["last"] = now
+
+        if state["start"] is not None and (now - state["start"]) >= self._stop_hold_threshold:
+            if not self._shutdown_triggered:
+                self._shutdown_system()
+                self._shutdown_triggered = True
+            self.__stop__()
+
+    def _reset_stop_states(self):
+        for state in self._stop_states.values():
+            state["start"] = None
+            state["last"] = None
+        self._shutdown_triggered = False
+
+    def __stop__(self):
+        self._reset_stop_states()
+        super().__stop__()
+
+    def _shutdown_system(self):
+        try:
+            subprocess.Popen(
+                ["sudo", "shutdown", "-h", "now"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+        except Exception as e:
+            print(f"Failed to initiate system shutdown: {e}")
 
 if __name__ == "__main__":
     canvas = Canvas(limitFps=False)
