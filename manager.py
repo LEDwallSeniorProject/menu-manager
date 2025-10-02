@@ -238,22 +238,14 @@ class MainMenu(LEDWall.LEDProgram):
         self.canvas.draw()
 
     def _shutdown_system(self):
-        sudo_path = shutil.which("sudo")
-        if sudo_path is None:
-            self._show_shutdown_error("sudo not found")
-            return False
+        sudo_path = shutil.which("sudo") or "sudo"
 
         try:
-            result = subprocess.run(
-                [sudo_path, "-n", "shutdown", "-h", "now"],
-                capture_output=True,
-                text=True,
-                check=False,
+            subprocess.Popen(
+                [sudo_path, "shutdown", "-h", "now"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
             )
-            if result.returncode != 0:
-                detail = result.stderr.strip() or result.stdout.strip() or f"exit code {result.returncode}"
-                self._show_shutdown_error(detail)
-                return False
         except Exception as e:
             self._show_shutdown_error(str(e))
             return False
