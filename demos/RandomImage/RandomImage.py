@@ -16,6 +16,7 @@ class RandomImage(LEDWall.LEDProgram):
         self.image_path = None
         self.display_started = None
         self.status_text = ""
+        self.last_draw_log = 0
         super().__init__(canvas, controller, trackFPS=False, fps=15)
 
     def preLoop(self):
@@ -40,19 +41,26 @@ class RandomImage(LEDWall.LEDProgram):
 
     def __draw__(self):
         if self.image is not None:
+            start = time.time()
             self.canvas.add(self.image)
-            self.canvas.draw()
+            elapsed = time.time() - start
+            now = time.time()
+            if now - self.last_draw_log > 1:
+                self._log(f"Image added to canvas in {elapsed:.4f}s")
+                self.last_draw_log = now
         else:
             fallback = shapes.Phrase("NO IMAGE", (64, 60), ERROR_COLOR, size=1.5)
             fallback.translate(0 - fallback.get_width() / 2, 0)
             self.canvas.add(fallback)
-            self.canvas.draw()
+            now = time.time()
+            if now - self.last_draw_log > 1:
+                self._log("Fallback message drawn")
+                self.last_draw_log = now
 
         if self.status_text:
             status_color = STATUS_COLOR if self.image is not None else ERROR_COLOR
             status = shapes.Phrase(self.status_text, (2, 118), status_color)
             self.canvas.add(status)
-            self.canvas.draw()
 
         if (time.time() - self.display_started) >= DISPLAY_DURATION:
             self.quit()
