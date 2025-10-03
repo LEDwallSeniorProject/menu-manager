@@ -1,6 +1,7 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
 from os import scandir, chdir, getcwd, path
 from importlib.util import spec_from_file_location, module_from_spec
+import math
 import shutil
 import subprocess
 import threading
@@ -115,6 +116,8 @@ class MainMenu(LEDWall.LEDProgram):
                 self._queue_next_autorun_demo()
         elif self.isBasePath() and (now - self.autoRunTime) > self._autorun_idle_threshold:
             self.autoRunner()
+
+        self._draw_autorun_countdown(now)
 
     def __bind_controls__(self):
         self.controller.add_function("LB", self.toggle_track_fps)
@@ -406,6 +409,25 @@ class MainMenu(LEDWall.LEDProgram):
         self.autoRunTime = time.time()
         self._autorun_next_launch_at = 0
         self._autorun_timeout_triggered = False
+
+    def _draw_autorun_countdown(self, now):
+        if not self.isBasePath():
+            return
+
+        remaining = None
+        if self._autorun_active:
+            if self._autorun_should_launch_next and self._autorun_next_launch_at:
+                remaining = self._autorun_next_launch_at - now
+        else:
+            remaining = self._autorun_idle_threshold - (now - self.autoRunTime)
+
+        if remaining is None or remaining <= 0:
+            return
+
+        seconds = max(0, math.ceil(remaining))
+        countdown = shapes.Phrase(f"{seconds}s", (0, 0), WHITE)
+        countdown.translate(128 - countdown.get_width() - 2, 128 - 10)
+        self.canvas.add(countdown)
 
 if __name__ == "__main__":
     canvas = Canvas(limitFps=False)
