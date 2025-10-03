@@ -41,15 +41,18 @@ class RandomImage(LEDWall.LEDProgram):
     def __draw__(self):
         if self.image is not None:
             self.canvas.add(self.image)
+            self.canvas.draw()
         else:
             fallback = shapes.Phrase("NO IMAGE", (64, 60), ERROR_COLOR, size=1.5)
             fallback.translate(0 - fallback.get_width() / 2, 0)
             self.canvas.add(fallback)
+            self.canvas.draw()
 
         if self.status_text:
             status_color = STATUS_COLOR if self.image is not None else ERROR_COLOR
             status = shapes.Phrase(self.status_text, (2, 118), status_color)
             self.canvas.add(status)
+            self.canvas.draw()
 
         if (time.time() - self.display_started) >= DISPLAY_DURATION:
             self.quit()
