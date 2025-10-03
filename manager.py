@@ -8,8 +8,8 @@ import threading
 import time
 
 WHITE = (255, 255, 255)
-BLUE = (50, 100, 255)
-TITLECOLOR = (50, 255, 50)
+TITLECOLOR = (140, 33, 49)
+HIGHLIGHT = (243, 205, 0)
 ERRORCOLOR = (255, 80, 80)
 
 class MainMenu(LEDWall.LEDProgram):
@@ -25,6 +25,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.selection = 0
         self.options = []
         self.hidden_dirs = {"test"}
+        self.knight_badge = None
 
         # track SELECT hold timing for safe shutdown
         self._stop_hold_threshold = 3.0
@@ -60,6 +61,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.base_path = path.dirname(path.abspath(__file__))
         chdir(self.base_path)
         self.getOptions()
+        self._load_knight_badge()
 
         if self._autorun_context_to_restore:
             self._apply_autorun_context(self._autorun_context_to_restore)
@@ -112,7 +114,7 @@ class MainMenu(LEDWall.LEDProgram):
         self.canvas.add(title)
 
         for index in range(len(self.options)):
-            itemColor = WHITE if self.selection != index else BLUE
+            itemColor = WHITE if self.selection != index else HIGHLIGHT
             label = self._option_display_name(index)
             option = shapes.Phrase(
                 label,
@@ -121,6 +123,9 @@ class MainMenu(LEDWall.LEDProgram):
             )
             option.translate(0 - option.get_width() / 2, 0)
             self.canvas.add(option)
+
+        if self.knight_badge is not None:
+            self.canvas.add(self.knight_badge)
 
         now = time.time()
         if self._autorun_active:
@@ -244,6 +249,17 @@ class MainMenu(LEDWall.LEDProgram):
 
     def isBasePath(self):
         return path.abspath(getcwd()) == path.abspath(self.base_path)
+
+    def _load_knight_badge(self):
+        if self.knight_badge is not None:
+            return
+        try:
+            badge = shapes.Image(width=40, height=40, position=[0, 128 - 40])
+            badge.loadfile(path.join(self.base_path, "knights.png"))
+            self.knight_badge = badge
+        except Exception as exc:
+            print(f"Failed to load knight badge: {exc}")
+            self.knight_badge = None
 
     def _select_stop(self):
         self._autorun_register_input()
