@@ -6,7 +6,6 @@ from matrix_library import LEDWall, Canvas, Controller, shapes
 
 IMAGE_DIRECTORY = "/home/led/pictures"
 DISPLAY_DURATION = 10
-STATUS_COLOR = (255, 255, 0)
 ERROR_COLOR = (255, 0, 0)
 LOG_PATH = "/tmp/random_image.log"
 
@@ -25,8 +24,6 @@ class RandomImage(LEDWall.LEDProgram):
             self.image = shapes.Image(width=128, height=128, position=[0, 0])
             try:
                 self.image.loadfile(self.image_path)
-                filename = os.path.basename(self.image_path)
-                self.status_text = f"Showing {filename}"
                 self._log(f"Loaded image: {self.image_path}")
             except Exception as exc:
                 self._log(f"Failed to load image {self.image_path}: {exc}")
@@ -45,8 +42,7 @@ class RandomImage(LEDWall.LEDProgram):
             self.canvas.add(fallback)
 
         if self.status_text:
-            status_color = STATUS_COLOR if self.image is not None else ERROR_COLOR
-            status = shapes.Phrase(self.status_text, (2, 118), status_color)
+            status = shapes.Phrase(self.status_text, (4, 118), ERROR_COLOR)
             self.canvas.add(status)
 
     def __loop__(self):

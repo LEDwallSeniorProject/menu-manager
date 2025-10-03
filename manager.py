@@ -111,7 +111,7 @@ class MainMenu(LEDWall.LEDProgram):
         title.translate(0 - title.get_width() / 2, 0)
         self.canvas.add(title)
 
-        for index, item in enumerate(self.options):
+        for index in range(len(self.options)):
             itemColor = WHITE if self.selection != index else BLUE
             label = self._option_display_name(index)
             option = shapes.Phrase(
