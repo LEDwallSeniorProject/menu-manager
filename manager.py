@@ -219,7 +219,14 @@ class MainMenu(LEDWall.LEDProgram):
         else:
             self.options.append("Exit")
 
+        if self.options:
+            self.selection %= len(self.options)
+        else:
+            self.selection = 0
+
     def _option_display_name(self, index):
+        if index < 0 or index >= len(self.options):
+            return ""
         option = self.options[index]
         if option in {"Back", "Exit"}:
             return option
@@ -228,6 +235,8 @@ class MainMenu(LEDWall.LEDProgram):
         return option[0].upper() + option[1:]
 
     def _option_real_name(self, index):
+        if index < 0 or index >= len(self.options):
+            return ""
         option = self.options[index]
         if option in {"Back", "Exit"}:
             return option
