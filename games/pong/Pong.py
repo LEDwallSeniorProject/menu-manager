@@ -1,4 +1,5 @@
 from matrix_library import LEDWall, Canvas, Controller
+import numpy as np
 import random
 import sys
 import matrix_library as matrix
@@ -164,7 +165,7 @@ class Pong(LEDWall.LEDProgram):
 
     def reset_ball(self):
         # Reset ball position to center 
-        self.ball.center = (self.WIDTH // 2, self.HEIGHT // 2)
+        self.ball.center = np.array((self.WIDTH // 2, self.HEIGHT // 2), dtype=float)
         
         # Randomize ball direction
         direction = random.choice([-1, 1])
@@ -299,7 +300,7 @@ class Ball(matrix.Circle):
             self.center[0] + self.velocity_x,
             self.center[1] + self.velocity_y
         )
-        self.center = new_center
+        self.center = np.array(new_center, dtype=float)
 
         # Paddle collision detection
         self.check_paddle_collision(game, paddle1, paddle2)
