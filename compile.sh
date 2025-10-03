@@ -3,5 +3,6 @@
 python -m compileall .
 cd demos
 python -m compileall .
-cd ../games
+cd ..
+cd games
 python -m compileall .
