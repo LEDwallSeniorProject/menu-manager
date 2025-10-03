@@ -14,6 +14,10 @@ ERRORCOLOR = (255, 80, 80)
 
 class MainMenu(LEDWall.LEDProgram):
     def __init__(self, canvas, controller):
+        pending_autorun = getattr(self, "_pending_autorun_context", None)
+        self._pending_autorun_context = None
+        self._autorun_context_to_restore = pending_autorun
+
         # pointer to subclass to be executed on loop halt
         self.queued = None
 
@@ -57,6 +61,10 @@ class MainMenu(LEDWall.LEDProgram):
         chdir(self.base_path)
         self.getOptions()
 
+        if self._autorun_context_to_restore:
+            self._apply_autorun_context(self._autorun_context_to_restore)
+            self._autorun_context_to_restore = None
+
     def postLoop(self):
         if self.queued != None:
             try:
@@ -84,7 +92,10 @@ class MainMenu(LEDWall.LEDProgram):
                         self._autorun_timeout_triggered = False
                     self.autoRunTime = time.time()
 
+        autorun_context = self._snapshot_autorun_context()
+
         if not self.__exited__:
+            self._pending_autorun_context = autorun_context
             self.__init__(self.canvas, self.controller)
         elif self._shutdown_triggered:
             return
@@ -102,8 +113,9 @@ class MainMenu(LEDWall.LEDProgram):
 
         for index, item in enumerate(self.options):
             itemColor = WHITE if self.selection != index else BLUE
+            label = self._option_display_name(index)
             option = shapes.Phrase(
-                item,
+                label,
                 (64, 32 + index * 12),
                 itemColor,
             )
@@ -160,7 +172,8 @@ class MainMenu(LEDWall.LEDProgram):
             self.getOptions()
 
         else:
-            chdir(self.options[self.selection])
+            target_name = self._option_real_name(self.selection)
+            chdir(target_name)
             self.checkExecutable()
             self.options = []
             self.getOptions()
@@ -205,6 +218,20 @@ class MainMenu(LEDWall.LEDProgram):
             self.options.append("Back")
         else:
             self.options.append("Exit")
+
+    def _option_display_name(self, index):
+        option = self.options[index]
+        if option in {"Back", "Exit"}:
+            return option
+        if not option:
+            return option
+        return option[0].upper() + option[1:]
+
+    def _option_real_name(self, index):
+        option = self.options[index]
+        if option in {"Back", "Exit"}:
+            return option
+        return option
 
     def isBasePath(self):
         return path.abspath(getcwd()) == path.abspath(self.base_path)
@@ -349,6 +376,30 @@ class MainMenu(LEDWall.LEDProgram):
                         func()
         except Exception as e:
             print(f"Failed to signal autorun stop: {e}")
+
+    def _snapshot_autorun_context(self):
+        return {
+            "active": self._autorun_active,
+            "queue": list(self._autorun_queue),
+            "index": self._autorun_index,
+            "any_input": self._autorun_any_input,
+            "should_launch_next": self._autorun_should_launch_next,
+            "running_demo": self._autorun_running_demo,
+            "next_launch_at": self._autorun_next_launch_at,
+            "timeout_triggered": self._autorun_timeout_triggered,
+            "autoRunTime": self.autoRunTime,
+        }
+
+    def _apply_autorun_context(self, context):
+        self._autorun_active = context.get("active", False)
+        self._autorun_queue = list(context.get("queue", []))
+        self._autorun_index = context.get("index", 0)
+        self._autorun_any_input = context.get("any_input", False)
+        self._autorun_should_launch_next = context.get("should_launch_next", False)
+        self._autorun_running_demo = context.get("running_demo", False)
+        self._autorun_next_launch_at = context.get("next_launch_at", 0)
+        self._autorun_timeout_triggered = context.get("timeout_triggered", False)
+        self.autoRunTime = context.get("autoRunTime", self.autoRunTime)
 
     def _collect_demos(self):
         demos_path = path.join(self.base_path, "demos")
