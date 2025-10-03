@@ -17,6 +17,7 @@ class RandomImage(LEDWall.LEDProgram):
         self.display_started = None
         self.status_text = ""
         self.last_draw_log = 0
+        self._image_added_once = False
         super().__init__(canvas, controller, trackFPS=False, fps=15)
 
     def preLoop(self):
@@ -29,6 +30,7 @@ class RandomImage(LEDWall.LEDProgram):
                 filename = os.path.basename(self.image_path)
                 self.status_text = f"Showing {filename}"
                 self._log(f"Loaded image: {self.image_path}")
+                self._image_added_once = False
             except Exception as exc:
                 self._log(f"Failed to load image {self.image_path}: {exc}")
                 self.status_text = "Load failed"
@@ -36,18 +38,26 @@ class RandomImage(LEDWall.LEDProgram):
         else:
             self.image = None
             self.status_text = "No images found"
+            self._image_added_once = False
 
         self.display_started = time.time()
 
     def __draw__(self):
         if self.image is not None:
             start = time.time()
-            self.canvas.add(self.image)
-            elapsed = time.time() - start
-            now = time.time()
-            if now - self.last_draw_log > 1:
-                self._log(f"Image added to canvas in {elapsed:.4f}s")
-                self.last_draw_log = now
+            try:
+                self.canvas.add(self.image)
+                elapsed = time.time() - start
+                now = time.time()
+                if (not self._image_added_once) or (now - self.last_draw_log > 1):
+                    self._log(f"Image added to canvas in {elapsed:.4f}s")
+                    self.last_draw_log = now
+                self._image_added_once = True
+            except Exception as exc:
+                self._log(f"Failed to add image to canvas: {exc}")
+                self.status_text = "Display failed"
+                self.image = None
+                self._image_added_once = False
         else:
             fallback = shapes.Phrase("NO IMAGE", (64, 60), ERROR_COLOR, size=1.5)
             fallback.translate(0 - fallback.get_width() / 2, 0)
@@ -58,7 +68,7 @@ class RandomImage(LEDWall.LEDProgram):
                 self.last_draw_log = now
 
         if self.status_text:
-            status_color = STATUS_COLOR if self.image is not None else ERROR_COLOR
+            status_color = STATUS_COLOR if (self.image is not None and self._image_added_once) else ERROR_COLOR
             status = shapes.Phrase(self.status_text, (2, 118), status_color)
             self.canvas.add(status)
 
