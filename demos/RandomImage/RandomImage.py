@@ -19,7 +19,6 @@ class RandomImage(LEDWall.LEDProgram):
         super().__init__(canvas, controller, trackFPS=False, fps=15)
 
     def preLoop(self):
-        self.display_started = time.time()
         self.image_path = self._choose_image()
 
         if self.image_path:
@@ -36,6 +35,8 @@ class RandomImage(LEDWall.LEDProgram):
         else:
             self.image = None
             self.status_text = "No images found"
+
+        self.display_started = time.time()
 
     def __draw__(self):
         if self.image is not None:

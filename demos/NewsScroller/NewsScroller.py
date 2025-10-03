@@ -10,8 +10,9 @@ MAX_TITLES = 3
 SCROLL_SPEED = 2
 TEXT_COLOR = (255, 255, 255)
 HEADER_COLOR = (255, 215, 0)
-HEADER_POSITION = [4, 8]
-DATE_POSITION = [4, 20]
+HEADER_POSITION = [64, 10]
+HEADER_LINE_Y = 18
+DATE_POSITION = [64, 24]
 
 
 class NewsScroller(LEDWall.LEDProgram):
@@ -21,6 +22,7 @@ class NewsScroller(LEDWall.LEDProgram):
         self.current_phrase = None
         self.completed = False
         self.header_phrase = None
+        self.header_line = None
         self.date_phrase = None
         super().__init__(canvas, controller, trackFPS=False, fps=20)
 
@@ -41,6 +43,8 @@ class NewsScroller(LEDWall.LEDProgram):
 
         if self.header_phrase:
             self.canvas.add(self.header_phrase)
+        if self.header_line:
+            self.canvas.add(self.header_line)
         if self.date_phrase:
             self.canvas.add(self.date_phrase)
 
@@ -101,9 +105,17 @@ class NewsScroller(LEDWall.LEDProgram):
         return titles, formatted_date
 
     def _prepare_header(self, pulled_date):
-        self.header_phrase = shapes.Phrase("NYT News", HEADER_POSITION, HEADER_COLOR, size=1.2)
+        self.header_phrase = shapes.Phrase("NYT NEWS", HEADER_POSITION, HEADER_COLOR, size=1)
+        self.header_phrase.translate(0 - self.header_phrase.get_width() / 2, 0)
+        self.header_line = shapes.Line(
+            [16, HEADER_LINE_Y],
+            [112, HEADER_LINE_Y],
+            HEADER_COLOR,
+        )
         if pulled_date:
-            self.date_phrase = shapes.Phrase(pulled_date, DATE_POSITION, TEXT_COLOR, size=1)
+            label = f"(for {pulled_date})"
+            self.date_phrase = shapes.Phrase(label, DATE_POSITION, TEXT_COLOR, size=1)
+            self.date_phrase.translate(0 - self.date_phrase.get_width() / 2, 0)
         else:
             self.date_phrase = None
 
