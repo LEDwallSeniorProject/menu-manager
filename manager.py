@@ -139,9 +139,20 @@ class MainMenu(LEDWall.LEDProgram):
             self.canvas.clear()
 
     def __draw__(self):
-        title = shapes.Phrase("MENU", (64, 5), TITLECOLOR, size=1.5)
+        # Dynamic header: base shows MENU, subfolders show folder name uppercased
+        header_text = "MENU" if self.isBasePath() else path.basename(getcwd()).upper()
+        title = shapes.Phrase(header_text, (64, 5), TITLECOLOR, size=1.5)
         title.translate(0 - title.get_width() / 2, 0)
         self.canvas.add(title)
+        # Underline one blank pixel below the text, matching width
+        try:
+            underline_y = int(title.position[1] + 8 * title.size + 1)
+            underline_start_x = int(title.position[0])
+            underline_end_x = int(title.position[0] + title.get_width())
+            underline = shapes.Line([underline_start_x, underline_y], [underline_end_x, underline_y], TITLECOLOR, thickness=0.5)
+            self.canvas.add(underline)
+        except Exception:
+            pass
 
         # If controllers are offline on the board, show waiting screen and reset to base
         try:
@@ -176,11 +187,12 @@ class MainMenu(LEDWall.LEDProgram):
         if self.knight_badge is not None:
             self.canvas.add(self.knight_badge)
 
-        # Branded footer text beside badge
+        # Branded footer text beside badge (adjusted position and case)
         try:
-            text_y_top = 88 + 26  # not higher than 2/3 up the badge
-            line1 = shapes.Phrase("COMPUTER", (50, text_y_top), TITLECOLOR)
-            line2 = shapes.Phrase("SCIENCE", (50, text_y_top + 10), TITLECOLOR)
+            text_y_top = (88 + 26) - 8  # move up 8px from the previous placement
+            text_x = 50 - 8              # move left 8px from the previous placement
+            line1 = shapes.Phrase("Computer", (text_x, text_y_top), TITLECOLOR)
+            line2 = shapes.Phrase("Science", (text_x, text_y_top + 10), TITLECOLOR)
             self.canvas.add(line1)
             self.canvas.add(line2)
         except Exception:
