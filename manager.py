@@ -27,6 +27,8 @@ class MainMenu(LEDWall.LEDProgram):
         self.options = []
         self.hidden_dirs = {"test"}
         self.knight_badge = None
+        self.page = 0
+        self.page_size = 4
 
         # track SELECT hold timing for safe shutdown
         self._stop_hold_threshold = 3.0
@@ -165,7 +167,7 @@ class MainMenu(LEDWall.LEDProgram):
             label = self._option_display_name(index)
             option = shapes.Phrase(
                 label,
-                (64, 32 + index * 12),
+                (64, 22 + index * 12),
                 itemColor,
             )
             option.translate(0 - option.get_width() / 2, 0)
@@ -174,12 +176,33 @@ class MainMenu(LEDWall.LEDProgram):
         if self.knight_badge is not None:
             self.canvas.add(self.knight_badge)
 
+        # Branded footer text beside badge
+        try:
+            text_y_top = 88 + 26  # not higher than 2/3 up the badge
+            line1 = shapes.Phrase("COMPUTER", (50, text_y_top), TITLECOLOR)
+            line2 = shapes.Phrase("SCIENCE", (50, text_y_top + 10), TITLECOLOR)
+            self.canvas.add(line1)
+            self.canvas.add(line2)
+        except Exception:
+            pass
+
         now = time.time()
         if self._autorun_active:
             if self._autorun_should_launch_next and now >= self._autorun_next_launch_at:
                 self._queue_next_autorun_demo()
         elif self.isBasePath() and (now - self.autoRunTime) > self._autorun_idle_threshold:
             self.autoRunner()
+        elif (not self.isBasePath()) and (now - self.autoRunTime) > self._autorun_idle_threshold:
+            # From submenus, after idle timeout go back and start demos
+            try:
+                chdir(self.base_path)
+            except Exception:
+                pass
+            self.options = []
+            self.getOptions()
+            self.autoRunTime = time.time()
+            self.autoRunner()
+            return
 
         self._draw_autorun_countdown(now)
 
@@ -228,15 +251,26 @@ class MainMenu(LEDWall.LEDProgram):
 
         elif self.options[self.selection] == "Back":
             chdir("..")
+            self.page = 0
             self.options = []
             self.getOptions()
 
         else:
             target_name = self._option_real_name(self.selection)
-            chdir(target_name)
-            self.checkExecutable()
-            self.options = []
-            self.getOptions()
+            if target_name == "Next":
+                self.page += 1
+                self.options = []
+                self.getOptions()
+            elif target_name == "Previous":
+                self.page = max(0, self.page - 1)
+                self.options = []
+                self.getOptions()
+            else:
+                chdir(target_name)
+                self.page = 0
+                self.checkExecutable()
+                self.options = []
+                self.getOptions()
         
         self.autoRunTime = time.time()
 
@@ -258,6 +292,7 @@ class MainMenu(LEDWall.LEDProgram):
 
     def getOptions(self):
         try:
+            dirs = []
             with scandir() as directory:
                 for handle in directory:
                     if (
@@ -266,17 +301,30 @@ class MainMenu(LEDWall.LEDProgram):
                         and handle.is_dir()
                         and handle.name not in self.hidden_dirs
                     ):
-                        self.options.append(handle.name)
+                        dirs.append(handle.name)
 
         except Exception as e:
             raise Exception(
                 "Something went wrong trying to look for options in the current directory"
             ) from e
 
-        self.options.sort()
-        if self.isBasePath() == False:
+        dirs.sort()
+        self.options = []
+        if not self.isBasePath():
+            total = len(dirs)
+            if total > 0:
+                total_pages = max(1, (total + self.page_size - 1) // self.page_size)
+                self.page = max(0, min(self.page, total_pages - 1))
+                start = self.page * self.page_size
+                end = min(total, start + self.page_size)
+                self.options.extend(dirs[start:end])
+                if self.page > 0:
+                    self.options.append("Previous")
+                if end < total:
+                    self.options.append("Next")
             self.options.append("Back")
         else:
+            self.options.extend(dirs)
             self.options.append("Exit")
 
         if self.options:
