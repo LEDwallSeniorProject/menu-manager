@@ -1,6 +1,7 @@
 from matrix_library import LEDWall, Canvas, Controller, shapes
 from os import scandir, chdir, getcwd, path
 from importlib.util import spec_from_file_location, module_from_spec
+import os
 import math
 import shutil
 import subprocess
@@ -368,19 +369,38 @@ class MainMenu(LEDWall.LEDProgram):
         self.canvas.draw()
 
     def _shutdown_system(self):
-        sudo_path = shutil.which("sudo") or "sudo"
+        # Use absolute paths to avoid PATH issues under systemd
+        sudo_path = "/usr/bin/sudo" if os.path.exists("/usr/bin/sudo") else (shutil.which("sudo") or "sudo")
+        shutdown_path_candidates = [
+            "/usr/sbin/shutdown",
+            "/sbin/shutdown",
+            "shutdown",
+        ]
+        shutdown_path = next((p for p in shutdown_path_candidates if (p == "shutdown" or os.path.exists(p))), "shutdown")
 
         try:
             subprocess.Popen(
-                [sudo_path, "shutdown", "-h", "now"],
+                [sudo_path, shutdown_path, "-h", "now"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
+            return True
+        except FileNotFoundError:
+            # Fallback to systemctl poweroff
+            try:
+                systemctl = "/usr/bin/systemctl" if os.path.exists("/usr/bin/systemctl") else "systemctl"
+                subprocess.Popen(
+                    [sudo_path, systemctl, "poweroff"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
+                return True
+            except Exception as e:
+                self._show_shutdown_error(str(e))
+                return False
         except Exception as e:
             self._show_shutdown_error(str(e))
             return False
-
-        return True
 
     def autoRunner(self):
         demos = self._collect_demos()
