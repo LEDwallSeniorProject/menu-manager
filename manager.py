@@ -51,6 +51,9 @@ class MainMenu(LEDWall.LEDProgram):
         self._autorun_cycle_gap = 1.0
         self._autorun_timeout_triggered = False
         
+        # brief input lockout to avoid double-press actions
+        self._input_disabled_until = 0.0
+        
         # begin the code
         super().__init__(canvas, controller, trackFPS=False, fps=15)
 
@@ -93,6 +96,18 @@ class MainMenu(LEDWall.LEDProgram):
                         self._autorun_next_launch_at = time.time() + self._autorun_cycle_gap
                         self._autorun_timeout_triggered = False
                     self.autoRunTime = time.time()
+                else:
+                    # Manual launch: fully suspend autorun and reset idle timer
+                    self._autorun_active = False
+                    self._autorun_should_launch_next = False
+                    self._autorun_running_demo = False
+                    self._autorun_any_input = False
+                    self._autorun_next_launch_at = 0
+                    self._autorun_timeout_triggered = False
+                    self._autorun_queue = []
+                    self.autoRunTime = time.time()
+                    # input lockout for 0.5s to prevent double presses
+                    self._input_disabled_until = time.time() + 0.5
 
         autorun_context = self._snapshot_autorun_context()
 
@@ -152,20 +167,28 @@ class MainMenu(LEDWall.LEDProgram):
         self.controller.add_function("SELECT2", self._select2_stop)
 
     def toggle_track_fps(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         self.trackFPS = not self.trackFPS
 
     def selection_up(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         self.selection = (self.selection - 1) % len(self.options)
         self.autoRunTime = time.time()
 
     def selection_down(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         self.selection = (self.selection + 1) % len(self.options)
         self.autoRunTime = time.time()
 
     def enter(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         if self.options[self.selection] == "Exit":
             self._trigger_shutdown()
@@ -262,10 +285,14 @@ class MainMenu(LEDWall.LEDProgram):
             self.knight_badge = None
 
     def _select_stop(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         self._handle_stop_hold("SELECT")
 
     def _select2_stop(self):
+        if not self._input_enabled():
+            return
         self._autorun_register_input()
         self._handle_stop_hold("SELECT2")
 
@@ -485,6 +512,9 @@ class MainMenu(LEDWall.LEDProgram):
         self.autoRunTime = time.time()
         self._autorun_next_launch_at = 0
         self._autorun_timeout_triggered = False
+
+    def _input_enabled(self):
+        return time.time() >= self._input_disabled_until
 
     def _draw_autorun_countdown(self, now):
         if not self.isBasePath():
