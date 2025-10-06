@@ -141,6 +141,25 @@ class MainMenu(LEDWall.LEDProgram):
         title.translate(0 - title.get_width() / 2, 0)
         self.canvas.add(title)
 
+        # If controllers are offline on the board, show waiting screen and reset to base
+        try:
+            if hasattr(self.controller, "has_controller") and not self.controller.has_controller():
+                # ensure we're at the base path
+                if not self.isBasePath():
+                    chdir(self.base_path)
+                    self.options = []
+                    self.getOptions()
+                waiting = shapes.Phrase("Waiting for controller...", (64, 64), WHITE)
+                waiting.translate(0 - waiting.get_width() / 2, -4)
+                self.canvas.add(waiting)
+                # prevent autorun while waiting, and reset idle timer
+                self._autorun_active = False
+                self._autorun_should_launch_next = False
+                self.autoRunTime = time.time()
+                return
+        except Exception:
+            pass
+
         for index in range(len(self.options)):
             itemColor = WHITE if self.selection != index else HIGHLIGHT
             label = self._option_display_name(index)
