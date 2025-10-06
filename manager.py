@@ -192,7 +192,8 @@ class MainMenu(LEDWall.LEDProgram):
             # Adjusted position: 4px further left, 2px further down
             text_y_top = (88 + 26) - 8 + 2
             text_x = (50 - 8) - 4
-            line1 = shapes.Phrase("Computer", (text_x, text_y_top), TITLECOLOR)
+            # Reduce line spacing by 2px by moving "Computer" down
+            line1 = shapes.Phrase("Computer", (text_x, text_y_top + 2), TITLECOLOR)
             line2 = shapes.Phrase("Science", (text_x, text_y_top + 10), TITLECOLOR)
             self.canvas.add(line1)
             self.canvas.add(line2)
