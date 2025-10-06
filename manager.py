@@ -109,6 +109,18 @@ class MainMenu(LEDWall.LEDProgram):
                     # input lockout for 0.5s to prevent double presses
                     self._input_disabled_until = time.time() + 0.5
 
+        # If a shutdown was requested, show banner, start shutdown and stop here
+        if self._shutdown_triggered:
+            try:
+                self._show_shutdown_message()
+            except Exception:
+                pass
+            try:
+                self._shutdown_system()
+            except Exception:
+                pass
+            return
+
         autorun_context = self._snapshot_autorun_context()
 
         if not self.__exited__:
@@ -325,13 +337,18 @@ class MainMenu(LEDWall.LEDProgram):
         if self._shutdown_triggered:
             return
 
+        # mark shutdown and stop loop/timers/inputs immediately
         self._shutdown_triggered = True
-        self._show_shutdown_message()
-        if self._shutdown_system():
-            self.__stop__()
-        else:
-            self._shutdown_triggered = False
-            self._reset_stop_states()
+        try:
+            self._cancel_autorun_timeout()
+        except Exception:
+            pass
+        self._autorun_active = False
+        try:
+            self.controller.stop()
+        except Exception:
+            pass
+        self.running = False
 
     def _show_shutdown_message(self):
         self._show_centered_phrase("SHUTDOWN", TITLECOLOR, 2)
