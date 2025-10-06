@@ -67,13 +67,13 @@ class Pong(LEDWall.LEDProgram):
         if self.game_state == MENU_STATE:
             self.controller.add_function("UP", self.menu_move_up)
             self.controller.add_function("DOWN", self.menu_move_down)
-            self.controller.add_function("Y", self.select_game_mode)
+            self.controller.add_function("A", self.select_game_mode)
             self.controller.add_function("START", self.select_game_mode)
             self.controller.add_function("SELECT", self.exit_prog)
 
             self.controller.add_function("UP2", self.menu_move_up)
             self.controller.add_function("DOWN2", self.menu_move_down)
-            self.controller.add_function("Y2", self.select_game_mode)
+            self.controller.add_function("A2", self.select_game_mode)
             self.controller.add_function("START2", self.select_game_mode)
             self.controller.add_function("SELECT2", self.exit_prog)
 
