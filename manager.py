@@ -189,8 +189,9 @@ class MainMenu(LEDWall.LEDProgram):
 
         # Branded footer text beside badge (adjusted position and case)
         try:
-            text_y_top = (88 + 26) - 8  # move up 8px from the previous placement
-            text_x = 50 - 8              # move left 8px from the previous placement
+            # Adjusted position: 4px further left, 2px further down
+            text_y_top = (88 + 26) - 8 + 2
+            text_x = (50 - 8) - 4
             line1 = shapes.Phrase("Computer", (text_x, text_y_top), TITLECOLOR)
             line2 = shapes.Phrase("Science", (text_x, text_y_top + 10), TITLECOLOR)
             self.canvas.add(line1)
